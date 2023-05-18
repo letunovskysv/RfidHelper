@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+ 
+  <Import Project="..\SmartMinex.RfidHelper.1.0.csproj" />
+
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Interfaces\" />
+    <Folder Include="Modules\" />
+  </ItemGroup>
+
+</Project>

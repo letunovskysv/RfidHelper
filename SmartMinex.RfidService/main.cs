@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// (C) 2017-2023 UralTehIS, LLC. UTIS Smart System Platform. Version 2.0. All rights reserved.
+// (C) 2023-2023 UralTehIS, LLC. UTIS Smart System Platform. Version 2.0. All rights reserved.
 // Описание: Служба Windows или демон Linux.
 //--------------------------------------------------------------------------------------------------
 using System.Reflection;

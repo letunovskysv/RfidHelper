@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SmartMinex.RfidDevices\SmartMinex.RfidDevices.csproj" />
+    <ProjectReference Include="..\SmartMinex.RfidStorage\SmartMinex.RfidStorage.csproj" />
   </ItemGroup>
 
   <ItemGroup>
