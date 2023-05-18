@@ -12,9 +12,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartMinex.RfidDevices", "S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartMinex.RfidService", "SmartMinex.RfidService\SmartMinex.RfidService.csproj", "{A7413F72-5C34-4D7A-A1DF-B64431C6C092}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartMinex.RfidStorage", "SmartMinex.RfidStorage\SmartMinex.RfidStorage.csproj", "{1CC857BA-FEF8-4113-A2FD-BFEE046247F4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartMinex.RfidStorage", "SmartMinex.RfidStorage\SmartMinex.RfidStorage.csproj", "{1CC857BA-FEF8-4113-A2FD-BFEE046247F4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartMinex.Runtime", "SmartMinex.Runtime\SmartMinex.Runtime.csproj", "{55F464EF-21C4-4837-83EB-33A7B6297E16}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartMinex.Runtime", "SmartMinex.Runtime\SmartMinex.Runtime.csproj", "{55F464EF-21C4-4837-83EB-33A7B6297E16}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartMinex.Core", "SmartMinex.Core\SmartMinex.Core.csproj", "{D13F59E6-CD6C-4A43-929B-7E94F8792967}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,6 +40,10 @@ Global
 		{55F464EF-21C4-4837-83EB-33A7B6297E16}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{55F464EF-21C4-4837-83EB-33A7B6297E16}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{55F464EF-21C4-4837-83EB-33A7B6297E16}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D13F59E6-CD6C-4A43-929B-7E94F8792967}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D13F59E6-CD6C-4A43-929B-7E94F8792967}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D13F59E6-CD6C-4A43-929B-7E94F8792967}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D13F59E6-CD6C-4A43-929B-7E94F8792967}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

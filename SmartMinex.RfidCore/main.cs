@@ -4,8 +4,9 @@
 //--------------------------------------------------------------------------------------------------
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
 using SmartMinex.Runtime;
+using SmartMinex.RFID;
+using System.Text.RegularExpressions;
 
 var _connName = "datasource";
 Type? _connType = null;

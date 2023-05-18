@@ -1,4 +1,8 @@
-﻿namespace SmartMinex.RFID
+﻿//--------------------------------------------------------------------------------------------------
+// (C) 2023-2023 UralTehIS, LLC. UTIS Smart System Platform. Version 2.0. All rights reserved.
+// Описание: SmartRuntimeService –
+//--------------------------------------------------------------------------------------------------
+namespace SmartMinex.RFID
 {
     #region Using
     using System;
@@ -9,11 +13,11 @@
     using SmartMinex.Runtime;
     #endregion Using
 
-    public sealed class SmartRuntime : BackgroundService
+    public sealed class SmartRuntimeService : BackgroundService
     {
-        private readonly ILogger<SmartRuntime> _logger;
+        private readonly ILogger<SmartRuntimeService> _logger;
 
-        public SmartRuntime(ILogger<SmartRuntime> logger)
+        public SmartRuntimeService(ILogger<SmartRuntimeService> logger)
         {
             _logger = logger;
         }
@@ -28,7 +32,7 @@
         }
     }
 
-    public static class SmartRuntimeBuilderExtensions
+    public static class ZRuntimeServiceBuilderExtensions
     {
         static Type? _connType = null;
         static string? _connStr = null;
@@ -38,7 +42,7 @@
             hostBuilder.ConfigureServices(srv =>
             {
                 srv.AddSingleton<DatabaseConnectionHandler>(srv => () => CreateDatabaseConnection(srv, connectionName) ?? throw new Exception("Не найдено подключение к базе данных!"));
-                srv.AddHostedService<SmartRuntime>();
+                srv.AddHostedService<SmartRuntimeService>();
             });
             return hostBuilder;
         }
