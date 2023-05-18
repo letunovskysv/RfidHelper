@@ -14,7 +14,7 @@ namespace SmartMinex.Runtime
     using Microsoft.Extensions.Logging;
     #endregion Using
 
-    public sealed class SmartRuntimeService : BackgroundService
+    public sealed class SmartRuntimeService : BackgroundService, IRuntime
     {
         #region Declarations
 
@@ -40,6 +40,9 @@ namespace SmartMinex.Runtime
         public RuntimeStatus Status { get; private set; }
         public long MessageCount { get; private set; }
         public DateTime Started { get; }
+
+        public IMetadata Metadata => throw new NotImplementedException();
+        public Version Version => throw new NotImplementedException();
 
         #endregion Properties
 
@@ -209,6 +212,16 @@ namespace SmartMinex.Runtime
 
         public T GetService<T>() =>
             Modules.GetModule<T>();
+
+        public string GetWorkDirectory()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IDatabase CreateDbConnection()
+        {
+            throw new NotImplementedException();
+        }
 
         #endregion IRuntime implementations
     }

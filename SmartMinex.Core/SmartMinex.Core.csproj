@@ -13,7 +13,7 @@
   
   <ItemGroup>
     <Folder Include="Database\" />
-    <Folder Include="Modules\" />
+    <Folder Include="Modules\Terminal\" />
   </ItemGroup>
   
   <ItemGroup>
