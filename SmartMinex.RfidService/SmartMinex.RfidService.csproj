@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <Import Project="..\SmartMinex.RfidHelper.1.0.csproj" />
+
+  <PropertyGroup>
+    <UserSecretsId>dotnet-SmartMinex.TagMonitor-a3217de2-ba62-4ad4-9941-7d8fb51d934b</UserSecretsId>
+    <AssemblyName>rfidviewer</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SmartMinex.RfidDevices\SmartMinex.RfidDevices.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Database\" />
+  </ItemGroup>
+</Project>

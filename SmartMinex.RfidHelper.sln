@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33424.131
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution", "Solution", "{9FA8ADB6-0BF1-4960-ABEC-8949D0E60803}"
+	ProjectSection(SolutionItems) = preProject
+		SmartMinex.RfidHelper.1.0.csproj = SmartMinex.RfidHelper.1.0.csproj
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartMinex.RfidDevices", "SmartMinex.RfidDevices\SmartMinex.RfidDevices.csproj", "{1C363111-1AE8-4B0E-95E3-7F587B5688F0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartMinex.RfidService", "SmartMinex.RfidService\SmartMinex.RfidService.csproj", "{A7413F72-5C34-4D7A-A1DF-B64431C6C092}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1C363111-1AE8-4B0E-95E3-7F587B5688F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C363111-1AE8-4B0E-95E3-7F587B5688F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C363111-1AE8-4B0E-95E3-7F587B5688F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C363111-1AE8-4B0E-95E3-7F587B5688F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7413F72-5C34-4D7A-A1DF-B64431C6C092}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7413F72-5C34-4D7A-A1DF-B64431C6C092}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7413F72-5C34-4D7A-A1DF-B64431C6C092}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7413F72-5C34-4D7A-A1DF-B64431C6C092}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {36E1AAE6-8660-424C-9C64-D5FD638C3736}
+	EndGlobalSection
+EndGlobal
