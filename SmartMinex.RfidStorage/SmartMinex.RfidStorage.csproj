@@ -5,4 +5,12 @@
   <PropertyGroup>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="7.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SmartMinex.Runtime\SmartMinex.Runtime.csproj" />
+  </ItemGroup>
+
 </Project>

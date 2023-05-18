@@ -9,6 +9,8 @@ namespace SmartMinex.Runtime
     using System.Collections.Concurrent;
     #endregion Using
 
+    public delegate IDatabase DatabaseConnectionHandler();
+
     public class TModule : IModule
     {
         #region Declarations
