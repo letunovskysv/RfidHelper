@@ -23,11 +23,7 @@ await Host.CreateDefaultBuilder(args)
         cfg.AddCommandLine(args, new Dictionary<string, string>());
         cfg.AddJsonFile(Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location) + ".runtimeconfig.json", true);
     })
-    .ConfigureServices(srv =>
-    {
-        srv.AddSingleton<DatabaseConnectionHandler>(srv => () => CreateDatabaseConnection(srv, _connName) ?? throw new Exception("Не найдено подключение к базе данных!"));
-        srv.AddHostedService<RfidMonitorService>();
-    })
+    .UseSmartSystemPlatform("datasource")
     .Build()
     .RunAsync();
 

@@ -1,3 +1,9 @@
 {
-  "datasource": "Provider=SQLITE;Data Source=data\\rfid.db;Cache=Shared;"
+  "datasource": "Provider=SQLITE;Data Source=data\\rfid.db;Cache=Shared;",
+  "providers": [
+    {
+      "name": "SQLITE",
+      "type": "SmartMinex.Data.SqlLiteDatabase"
+    }
+  ]
 }
