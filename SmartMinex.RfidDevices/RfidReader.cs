@@ -50,7 +50,10 @@ namespace SmartMinex.Rfid
         /// </remarks>
         public void Write(int address, int operation, int idBuffer)
         {
-            byte[] data = new byte[] { (byte)address, 0x42, (byte)operation, (byte)(idBuffer >> 8), (byte)idBuffer };
+            byte[] buf = new byte[] { (byte)address, 0x42, (byte)operation, (byte)(idBuffer >> 8), (byte)idBuffer };
+            _serial.Write(buf, 0, buf.Length);
+            return _serial.BytesToWrite;
+
         }
 
         /// <summary> Чтение данных из порта устройства.</summary>

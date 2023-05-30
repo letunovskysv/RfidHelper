@@ -10,7 +10,10 @@ namespace SmartMinex.Rfid
 
     public interface IDeviceConnection
     {
-
+        void Open();
+        void Close();
+        void Write(byte[] buffer, int offset, int count);
+        byte[]? Read();
     }
 
     public struct SerialPortSetting
@@ -32,6 +35,9 @@ namespace SmartMinex.Rfid
 
     public class SerialDeviceConnection : IDeviceConnection
     {
+        const int BUFSIZE = 320; // с учётом байт-стафинга
+        byte[] _input = new byte[BUFSIZE];
+
         SerialPortSetting _setting;
         SerialPort _serial;
 
@@ -73,6 +79,36 @@ namespace SmartMinex.Rfid
                 _serial.Dispose();
                 _serial = null;
             }
+        }
+
+        public void Write(byte[] buffer, int offset, int count) =>
+            _serial.Write(buffer, offset, count);
+
+        public byte[]? Read()
+        {
+            byte[]? data = null;
+            if (_serial.BytesToRead > 0)
+                try
+                {
+                    int size = 0;
+                    while (size == 0 || _serial.BytesToRead > 0)
+                    {
+                        var cnt = _serial.Read(_input, size, BUFSIZE - size);
+                        size += cnt;
+                    }
+                    data = new byte[size];
+                    Buffer.BlockCopy(_input, 0, data, 0, size);
+                }
+                catch (TimeoutException)
+                {
+                    data = null;
+                }
+                catch (Exception)
+                {
+                    data = null;
+                }
+
+            return data;
         }
     }
 }
