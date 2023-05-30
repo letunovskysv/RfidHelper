@@ -7,6 +7,10 @@
     }
   ],
   "modules": [
-
+    {
+      "name": "Служба опроса",
+      "type": "SmartMinex.Rfid.Modules.RfidMonitorService, SmartMinex.Core",
+      "start": "auto"
+    }
   ]
 }
