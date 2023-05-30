@@ -4,14 +4,16 @@
 //--------------------------------------------------------------------------------------------------
 namespace SmartMinex.Rfid
 {
+    #region Using
     using SmartMinex.Data;
     using System;
+    #endregion Using
 
     public class RfidReader : IDevice
     {
         #region Declarations
 
-        int _connection;
+        IDeviceConnection _connection;
 
         #endregion Declarations
 
@@ -23,6 +25,16 @@ namespace SmartMinex.Rfid
         public string? Descript { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         #endregion Properties
+
+        public RfidReader()
+        {
+            _connection = new SerialDeviceConnection(new SerialPortSetting()
+            {
+                BaudRate = 38400,
+                Parity = System.IO.Ports.Parity.Even,
+                StopBits = System.IO.Ports.StopBits.One
+            });
+        }
 
         #region Команды операций с буферами данных и сообщений
 
