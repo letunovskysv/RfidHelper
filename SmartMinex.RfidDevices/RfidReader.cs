@@ -48,11 +48,10 @@ namespace SmartMinex.Rfid
         /// DATA: поле данных 0...249;<br/>
         /// CRC16: контрольная сумма ModbusRTU
         /// </remarks>
-        public void Write(int address, int operation, int idBuffer)
+        public void Write(int address, int operation, int idBuffer, byte[] data)
         {
-            byte[] buf = new byte[] { (byte)address, 0x42, (byte)operation, (byte)(idBuffer >> 8), (byte)idBuffer };
-            _serial.Write(buf, 0, buf.Length);
-            return _serial.BytesToWrite;
+            var buf = CRC16(new byte[] { (byte)address, 0x42, (byte)operation, (byte)(idBuffer >> 8), (byte)idBuffer }.Concat(data).ToArray());
+            _connection.Write(buf, 0, buf.Length);
 
         }
 
@@ -76,6 +75,25 @@ namespace SmartMinex.Rfid
         public void Read(int address)
         {
 
+        }
+
+        /// <summary> Добавление контрольной суммы ModbusRTU к массиву данных.</summary>
+        byte[] CRC16(byte[] data)
+        {
+            int crc = 0xFFFF;
+            for (int pos = 0; pos < data.Length; pos++)
+            {
+                crc ^= data[pos];
+                for (int i = 8; i != 0; i--)
+                    if ((crc & 0x0001) != 0)
+                    {
+                        crc >>= 1;
+                        crc ^= 0xA001;
+                    }
+                    else
+                        crc >>= 1;
+            }
+            return data.Concat(new byte[] { (byte)crc, (byte)(crc >> 8) }).ToArray();
         }
 
         #endregion Команды операций с буферами данных и сообщений
