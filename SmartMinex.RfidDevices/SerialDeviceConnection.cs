@@ -35,7 +35,7 @@ namespace SmartMinex.Rfid
 
     public class SerialDeviceConnection : IDeviceConnection
     {
-        const int BUFSIZE = 320; // с учётом байт-стафинга
+        const int BUFSIZE = 255;
         byte[] _input = new byte[BUFSIZE];
 
         SerialPortSetting _setting;

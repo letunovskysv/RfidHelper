@@ -13,4 +13,9 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://Letunovsky@bitbucket.org/Letunovsky/smartminex.2.0.git</RepositoryUrl>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+
 </Project>

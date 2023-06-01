@@ -10,7 +10,8 @@
     {
       "name": "Служба опроса",
       "type": "SmartMinex.Rfid.Modules.RfidMonitorService, SmartMinex.Core",
-      "start": "auto"
+      "start": "auto",
+      "port": "COM1"
     }
   ]
 }

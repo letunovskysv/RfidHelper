@@ -17,4 +17,10 @@
     <ProjectReference Include="..\SmartMinex.RfidDevices\SmartMinex.RfidDevices.csproj" />
     <ProjectReference Include="..\SmartMinex.RfidStorage\SmartMinex.RfidStorage.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="runtimeconfig.template.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

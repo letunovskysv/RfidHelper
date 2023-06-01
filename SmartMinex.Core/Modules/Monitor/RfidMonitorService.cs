@@ -6,14 +6,22 @@ namespace SmartMinex.Rfid.Modules
 {
     #region Using
     using System;
+    using System.Text;
     using SmartMinex.Runtime;
     #endregion Using
 
     internal class RfidMonitorService : TModule
     {
-        public RfidMonitorService(IRuntime runtime) : base(runtime)
+        #region Declarations
+
+        string _port;
+
+        #endregion Declarations
+
+        public RfidMonitorService(IRuntime runtime, string port) : base(runtime)
         {
             Subscribe = new[] { MSG.ConsoleCommand };
+            _port = port;
         }
 
         protected override async Task ExecuteProcess()
@@ -49,12 +57,16 @@ namespace SmartMinex.Rfid.Modules
                 case "CONNECT":
                     Connect();
                     break;
+
+                case "SEND":
+                    Send(args[1..].Select(n => byte.TryParse(n[2..], System.Globalization.NumberStyles.HexNumber, null, out byte num) ? num : (byte)0).ToArray());
+                    break;
             }
         }
 
         void Connect()
         {
-            var reader = new RfidReader();
+            var reader = new RfidReader(_port);
             try
             {
                 reader.Open();
@@ -64,6 +76,35 @@ namespace SmartMinex.Rfid.Modules
             catch (Exception ex)
             {
                 Runtime.Send(MSG.Terminal, 0, 0, "Ошибка подключения к устройству " + ex.Message);
+            }
+        }
+
+        void Send(byte[] data)
+        {
+            var reader = new RfidReader(_port);
+            try
+            {
+                reader.Open();
+                reader.Write(data);
+                Task.Delay(1000);
+            }
+            catch (Exception ex)
+            {
+                Runtime.Send(MSG.Terminal, 0, 0, "Ошибка подключения к устройству. " + ex.Message);
+            }
+            try
+            {
+                var resp = reader.Read();
+                reader.Close();
+                if (resp == null)
+                    Runtime.Send(MSG.Terminal, 0, 0, "Данные не получены.");
+                else
+                    Runtime.Send(MSG.Terminal, 0, 0, "RX: " + string.Join(' ', resp.Select(n => "0x" + n.ToString("X2"))));
+            }
+            catch (Exception ex)
+            {
+                Runtime.Send(MSG.Terminal, 0, 0, "Ошибка получения данных. " + ex.Message);
+                Runtime.Send(MSG.ErrorMessage, 0, 0, ex);
             }
         }
     }

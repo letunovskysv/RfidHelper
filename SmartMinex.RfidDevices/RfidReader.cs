@@ -26,11 +26,11 @@ namespace SmartMinex.Rfid
 
         #endregion Properties
 
-        public RfidReader()
+        public RfidReader(string portName)
         {
             _connection = new SerialDeviceConnection(new SerialPortSetting()
             {
-                Name = "COM1",
+                Name = portName,
                 BaudRate = 38400,
                 Parity = System.IO.Ports.Parity.Even,
                 StopBits = System.IO.Ports.StopBits.One,
@@ -45,10 +45,16 @@ namespace SmartMinex.Rfid
 
         public void Close()
         {
-
+            _connection.Close();
         }
 
         #region Команды операций с буферами данных и сообщений
+
+        /// <summary> Прямая запись в последовательный порт. Добавляется контрольная сумма CRC16.</summary>
+        public void Write(byte[] data) => _connection.Write(CRC16(data), 0, data.Length + 2);
+
+        /// <summary> Чтение данных с устройства.</summary>
+        public byte[]? Read() => _connection.Read();
 
         /// <summary> Запись данных в порт устройства. Запрос данных.</summary>
         /// <param name="address"> адрес Modbus [1 … 247] </param>
@@ -64,7 +70,6 @@ namespace SmartMinex.Rfid
         {
             var buf = CRC16(new byte[] { (byte)address, 0x42, (byte)operation, (byte)(idBuffer >> 8), (byte)idBuffer }.Concat(data).ToArray());
             _connection.Write(buf, 0, buf.Length);
-
         }
 
         /// <summary> Чтение данных из порта устройства.</summary>
@@ -90,7 +95,7 @@ namespace SmartMinex.Rfid
         }
 
         /// <summary> Добавление контрольной суммы ModbusRTU к массиву данных.</summary>
-        byte[] CRC16(byte[] data)
+        static byte[] CRC16(byte[] data)
         {
             int crc = 0xFFFF;
             for (int pos = 0; pos < data.Length; pos++)
