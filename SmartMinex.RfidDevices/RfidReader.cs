@@ -30,10 +30,22 @@ namespace SmartMinex.Rfid
         {
             _connection = new SerialDeviceConnection(new SerialPortSetting()
             {
+                Name = "COM1",
                 BaudRate = 38400,
                 Parity = System.IO.Ports.Parity.Even,
-                StopBits = System.IO.Ports.StopBits.One
+                StopBits = System.IO.Ports.StopBits.One,
+                DataBits = 8
             });
+        }
+
+        public void Open()
+        {
+            _connection.Open();
+        }
+
+        public void Close()
+        {
+
         }
 
         #region Команды операций с буферами данных и сообщений

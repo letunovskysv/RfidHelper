@@ -50,24 +50,18 @@ namespace SmartMinex.Rfid
         public void Open()
         {
             Close();
-            try
+            _serial = new SerialPort()
             {
-                _serial = new SerialPort()
-                {
-                    PortName = _setting.Name,
-                    BaudRate = _setting.BaudRate,
-                    Parity = _setting.Parity,
-                    DataBits = _setting.DataBits,
-                    StopBits = _setting.StopBits,
-                    Handshake = Handshake.None,
-                    ReadTimeout = 1000,
-                    WriteTimeout = 1000
-                };
-                _serial.Open();
-            }
-            catch
-            {
-            }
+                PortName = _setting.Name,
+                BaudRate = _setting.BaudRate,
+                Parity = _setting.Parity,
+                DataBits = _setting.DataBits,
+                StopBits = _setting.StopBits,
+                Handshake = Handshake.None,
+                ReadTimeout = 1000,
+                WriteTimeout = 1000
+            };
+            _serial.Open();
         }
 
         /// <summary> Закрыть соединение.</summary>

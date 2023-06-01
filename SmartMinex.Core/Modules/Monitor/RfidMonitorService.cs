@@ -47,7 +47,23 @@ namespace SmartMinex.Rfid.Modules
             switch (args[0].ToUpper())
             {
                 case "CONNECT":
+                    Connect();
                     break;
+            }
+        }
+
+        void Connect()
+        {
+            var reader = new RfidReader();
+            try
+            {
+                reader.Open();
+                Runtime.Send(MSG.Terminal, 0, 0, "Подключение к устройству выполнено успешно!");
+                reader.Close();
+            }
+            catch (Exception ex)
+            {
+                Runtime.Send(MSG.Terminal, 0, 0, "Ошибка подключения к устройству " + ex.Message);
             }
         }
     }
