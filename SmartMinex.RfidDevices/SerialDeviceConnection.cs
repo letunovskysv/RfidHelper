@@ -35,7 +35,7 @@ namespace SmartMinex.Rfid
 
     public class SerialDeviceConnection : IDeviceConnection
     {
-        const int BUFSIZE = 255;
+        const int BUFSIZE = 256;
         byte[] _input = new byte[BUFSIZE];
 
         SerialPortSetting _setting;
@@ -57,9 +57,9 @@ namespace SmartMinex.Rfid
                 Parity = _setting.Parity,
                 DataBits = _setting.DataBits,
                 StopBits = _setting.StopBits,
-                //Handshake = Handshake.None,
-                //ReadTimeout = 100,
-                //WriteTimeout = 100
+                Handshake = Handshake.None,
+                ReadTimeout = 100,
+                WriteTimeout = 100
             };
             _serial.Open();
         }
@@ -80,31 +80,19 @@ namespace SmartMinex.Rfid
 
         public byte[]? Read()
         {
-            var attempt = 0;
-            var prev = 0;
             var pos = 0;
-            while (pos < BUFSIZE && attempt < 100)
+            try
             {
-                pos += _serial.Read(_input, pos, BUFSIZE - pos);
-                if (pos == prev)
-                {
-                    Task.Delay(10);
-                }
-                attempt++;
-                //  else attempt = 0;
+                while (pos < BUFSIZE)
+                    pos += _serial.Read(_input, pos, BUFSIZE - pos);
             }
-            //    }
-            //    catch (TimeoutException)
-            //    {
-            //        data = null;
-            //        throw;
-            //    }
-            //    catch (Exception)
-            //    {
-            //        data = null;
-            //        throw;
-            //    }
-
+            catch (TimeoutException)
+            {
+            }
+            catch
+            {
+                throw;
+            }
             return pos == 0 ? null : _input[0..pos];
         }
     }

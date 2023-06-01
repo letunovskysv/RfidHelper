@@ -80,7 +80,17 @@ namespace SmartMinex.Rfid
         ///     Если N в запросе меньше, чем минимальный набор неделимых данных, то вернется 0;<br/>
         /// CRС16: контрольная сумма ModbusRTU<br/>
         /// </remarks>
-        public byte[]? Receive() => _connection.Read();
+        public byte[]? Receive()
+        {
+            var buf = _connection.Read();
+            if (buf == null) return null;
+
+            var crc = CRC16(buf[0..^2])[^2..];
+            if (crc[0] != buf[^2] || crc[1] != buf[^1])
+                throw new Exception("Ошибка контрольной суммы.");
+
+            return buf[0..^2];
+        }
 
         /// <summary> Запись данных в порт устройства. Запрос данных.</summary>
         /// <param name="address"> адрес Modbus [1 … 247] </param>
@@ -118,7 +128,7 @@ namespace SmartMinex.Rfid
         }
 
         /// <summary> Добавление контрольной суммы ModbusRTU к массиву данных.</summary>
-        public static byte[] CRC16(byte[] data)
+        static byte[] CRC16(byte[] data)
         {
             int crc = 0xFFFF;
             for (int pos = 0; pos < data.Length; pos++)
