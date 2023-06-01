@@ -62,7 +62,8 @@ namespace SmartMinex.Rfid
         /// DATA: поле данных 0...249;<br/>
         /// CRC16: контрольная сумма ModbusRTU
         /// </remarks>
-        public void Send(byte[] data) => _connection.Write(CRC16(data), 0, data.Length + 2);
+        //public void Send(byte[] data) => _connection.Write(CRC16(data), 0, data.Length + 2);
+        public void Send(byte[] data) => _connection.Write(data, 0, data.Length);
 
         /// <summary> Чтение данных из порта устройства.</summary>
         /// <remarks>
@@ -91,7 +92,7 @@ namespace SmartMinex.Rfid
         }
 
         /// <summary> Чтение данных из очереди (SF=0x07).</summary>
-        public RfidTag[] ReadTags()
+        public RfidTag[] ReadTagsFromBuffer()
         {
             List<RfidTag>? res = null;
             int idBuffer = 0;
@@ -118,7 +119,7 @@ namespace SmartMinex.Rfid
         }
 
         /// <summary> Добавление контрольной суммы ModbusRTU к массиву данных.</summary>
-        static byte[] CRC16(byte[] data)
+        public static byte[] CRC16(byte[] data)
         {
             int crc = 0xFFFF;
             for (int pos = 0; pos < data.Length; pos++)

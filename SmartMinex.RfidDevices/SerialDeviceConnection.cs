@@ -96,10 +96,12 @@ namespace SmartMinex.Rfid
                 catch (TimeoutException)
                 {
                     data = null;
+                    throw;
                 }
                 catch (Exception)
                 {
                     data = null;
+                    throw;
                 }
 
             return data;
