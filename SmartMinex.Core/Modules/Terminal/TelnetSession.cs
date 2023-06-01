@@ -17,7 +17,7 @@ namespace SmartMinex.Runtime
     {
         #region Declarations
 
-        const string LOGO = "*********************\r\n*     РМ ГЕО 3.1    *\r\n*********************";
+        const string LOGO = "***********************\r\n*     RFID Monitor    *\r\n***********************";
         const string USER_PROMPT = "USER> ";
         const string PASS_PROMPT = "PASS> ";
         const string BREAK = "BREAK";
@@ -263,7 +263,10 @@ namespace SmartMinex.Runtime
                     if (string.IsNullOrWhiteSpace(input)) return;
 
                     StoreHistoryCommand(input);
-                    handler.Value?.Invoke(output, cmd, args.ToArray());
+                    if (handler.Value == null)
+                        Runtime.Send(MSG.ConsoleCommand, ProcessId, 0, input.Trim().SplitArguments());
+                    else
+                        handler.Value?.Invoke(output, cmd, args.ToArray());
                     break;
             }
 

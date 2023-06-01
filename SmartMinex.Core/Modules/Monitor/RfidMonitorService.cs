@@ -13,19 +13,22 @@ namespace SmartMinex.Rfid.Modules
     {
         public RfidMonitorService(IRuntime runtime) : base(runtime)
         {
-            Subscribe = new[] { MSG.Terminal };
+            Subscribe = new[] { MSG.ConsoleCommand };
         }
 
         protected override async Task ExecuteProcess()
         {
-            while ((Status & RuntimeStatus.Loop) > 0)
+            Status = RuntimeStatus.Running;
+            while (_sync.WaitOne() && (Status & RuntimeStatus.Loop) > 0)
                 try
                 {
                     while (_esb.TryDequeue(out TMessage m))
                     {
                         switch (m.Msg)
                         {
-                            case MSG.Terminal:
+                            case MSG.ConsoleCommand:
+                                if ((m.HParam == ProcessId || m.HParam == 0) && m.Data is string[] args && args.Length > 0)
+                                    DoCommand(m.LParam, args);
                                 break;
                         }
                     }
@@ -36,6 +39,16 @@ namespace SmartMinex.Rfid.Modules
                 }
 
             await base.ExecuteProcess();
+        }
+
+        /// <summary> Выполнить консольную команду.</summary>
+        void DoCommand(long idTerminal, string[] args)
+        {
+            switch (args[0].ToUpper())
+            {
+                case "CONNECT":
+                    break;
+            }
         }
     }
 }

@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <UserSecretsId>dotnet-SmartMinex.TagMonitor-a3217de2-ba62-4ad4-9941-7d8fb51d934b</UserSecretsId>
-    <AssemblyName>rfidviewer</AssemblyName>
+    <AssemblyName>rfidmonitor</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
