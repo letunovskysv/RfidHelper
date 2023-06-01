@@ -11,7 +11,8 @@
       "name": "Служба опроса",
       "type": "SmartMinex.Rfid.Modules.RfidMonitorService, SmartMinex.Core",
       "start": "auto",
-      "port": "COM1"
+      "port": "COM1",
+      "address": 2
     }
   ]
 }

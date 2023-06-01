@@ -14,14 +14,18 @@ namespace SmartMinex.Rfid.Modules
     {
         #region Declarations
 
+        /// <summary> Имя COM-порта.</summary>
         string _port;
+        /// <summary> Адрес (modbus) на линии RS-485. 1 по умолчанмию.</summary>
+        int _address;
 
         #endregion Declarations
 
-        public RfidMonitorService(IRuntime runtime, string port) : base(runtime)
+        public RfidMonitorService(IRuntime runtime, string port, int? address) : base(runtime)
         {
             Subscribe = new[] { MSG.ConsoleCommand };
             _port = port;
+            _address = address ?? 1;
         }
 
         protected override async Task ExecuteProcess()
@@ -66,7 +70,7 @@ namespace SmartMinex.Rfid.Modules
 
         void Connect()
         {
-            var reader = new RfidReader(_port);
+            var reader = new RfidReader(_port, _address);
             try
             {
                 reader.Open();
@@ -81,11 +85,11 @@ namespace SmartMinex.Rfid.Modules
 
         void Send(byte[] data)
         {
-            var reader = new RfidReader(_port);
+            var reader = new RfidReader(_port, _address);
             try
             {
                 reader.Open();
-                reader.Write(data);
+                reader.Send(data);
                 Task.Delay(1000);
             }
             catch (Exception ex)
@@ -94,7 +98,7 @@ namespace SmartMinex.Rfid.Modules
             }
             try
             {
-                var resp = reader.Read();
+                var resp = reader.Receive();
                 reader.Close();
                 if (resp == null)
                     Runtime.Send(MSG.Terminal, 0, 0, "Данные не получены.");

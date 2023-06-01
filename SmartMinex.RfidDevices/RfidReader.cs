@@ -7,6 +7,7 @@ namespace SmartMinex.Rfid
     #region Using
     using SmartMinex.Data;
     using System;
+    using static System.Runtime.InteropServices.JavaScript.JSType;
     #endregion Using
 
     public class RfidReader : IDevice
@@ -14,6 +15,7 @@ namespace SmartMinex.Rfid
         #region Declarations
 
         IDeviceConnection _connection;
+        byte _address;
 
         #endregion Declarations
 
@@ -26,7 +28,7 @@ namespace SmartMinex.Rfid
 
         #endregion Properties
 
-        public RfidReader(string portName)
+        public RfidReader(string portName, int address)
         {
             _connection = new SerialDeviceConnection(new SerialPortSetting()
             {
@@ -36,6 +38,7 @@ namespace SmartMinex.Rfid
                 StopBits = System.IO.Ports.StopBits.One,
                 DataBits = 8
             });
+            _address = (byte)address;
         }
 
         public void Open()
@@ -51,13 +54,6 @@ namespace SmartMinex.Rfid
         #region Команды операций с буферами данных и сообщений
 
         /// <summary> Прямая запись в последовательный порт. Добавляется контрольная сумма CRC16.</summary>
-        public void Write(byte[] data) => _connection.Write(CRC16(data), 0, data.Length + 2);
-
-        /// <summary> Чтение данных с устройства.</summary>
-        public byte[]? Read() => _connection.Read();
-
-        /// <summary> Запись данных в порт устройства. Запрос данных.</summary>
-        /// <param name="address"> адрес Modbus [1 … 247] </param>
         /// <remarks>
         /// ADDR: адрес Modbus [1 … 247];<br/>
         /// 0x42:определяемая пользователем функция — операция с буфером данных;<br/>
@@ -66,14 +62,9 @@ namespace SmartMinex.Rfid
         /// DATA: поле данных 0...249;<br/>
         /// CRC16: контрольная сумма ModbusRTU
         /// </remarks>
-        public void Write(int address, int operation, int idBuffer, byte[] data)
-        {
-            var buf = CRC16(new byte[] { (byte)address, 0x42, (byte)operation, (byte)(idBuffer >> 8), (byte)idBuffer }.Concat(data).ToArray());
-            _connection.Write(buf, 0, buf.Length);
-        }
+        public void Send(byte[] data) => _connection.Write(CRC16(data), 0, data.Length + 2);
 
         /// <summary> Чтение данных из порта устройства.</summary>
-        /// <param name="address"> адрес Modbus [1 … 247] </param>
         /// <remarks>
         /// ADDR: адрес Modbus [1 … 247];<br/>
         /// 0x42:определяемая пользователем функция — операция с буфером данных;<br/>
@@ -89,9 +80,35 @@ namespace SmartMinex.Rfid
         ///     Если N в запросе меньше, чем минимальный набор неделимых данных, то вернется 0;<br/>
         /// CRС16: контрольная сумма ModbusRTU<br/>
         /// </remarks>
-        public void Read(int address)
-        {
+        public byte[]? Receive() => _connection.Read();
 
+        /// <summary> Запись данных в порт устройства. Запрос данных.</summary>
+        /// <param name="address"> адрес Modbus [1 … 247] </param>
+        public void Write(int operation, int idBuffer, byte[] data)
+        {
+            var buf = new byte[] { _address, 0x42, (byte)operation, (byte)(idBuffer >> 8), (byte)idBuffer }.Concat(data).ToArray();
+            Send(buf);
+        }
+
+        /// <summary> Чтение данных из очереди (SF=0x07).</summary>
+        public RfidTag[] ReadBuffer(int idBuffer)
+        {
+            Send(new byte[] { _address, 0x42, 0x07, (byte)(idBuffer >> 8), (byte)idBuffer, 0xFF }.ToArray());
+            Task.Delay(50);
+            var resp = Receive();
+            List<RfidTag> res = null;
+            if (resp != null)
+            {
+                res = new List<RfidTag>();
+                var cnt = resp[5] + 5;
+                for (int i = 6; i < cnt;)
+                    res.Add(new RfidTag(
+                        (resp[i++] << 8) + resp[i++], // TagID (2 байта, big endian)
+                        resp[i++],
+                        resp[i++] / 10f
+                    ));
+            }
+            return res?.ToArray() ?? Array.Empty<RfidTag>();
         }
 
         /// <summary> Добавление контрольной суммы ModbusRTU к массиву данных.</summary>
@@ -114,5 +131,39 @@ namespace SmartMinex.Rfid
         }
 
         #endregion Команды операций с буферами данных и сообщений
+    }
+
+    public struct RfidTag
+    {
+        /// <summary> Идентификатор метки.</summary>
+        public int TagId;
+        /// <summary> Флаги телеметрии метки.</summary>
+        public RfidTagFlags Flags;
+        /// <summary> Напряжение батареи метки.</summary>
+        public float Battery;
+
+        /// <summary> Батарея неисправна (вздулась).</summary>
+        public bool BatteryFailed => Battery == 0xff;
+
+        public RfidTag(int tagid, int flags, float power)
+        {
+            TagId = tagid;
+            Flags = (RfidTagFlags)flags;
+            Battery = power;
+        }
+
+        public override string ToString()
+        {
+            return $"{TagId}, {Battery} В";
+        }
+    }
+
+    /// <summary> Флаги телеметрии метки.</summary>
+    [Flags]
+    public enum RfidTagFlags
+    {
+        None,
+        /// <summary> Заряд(1) / Разряд(0) </summary>
+        Charge
     }
 }
