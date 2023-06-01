@@ -62,8 +62,7 @@ namespace SmartMinex.Rfid
         /// DATA: поле данных 0...249;<br/>
         /// CRC16: контрольная сумма ModbusRTU
         /// </remarks>
-        //public void Send(byte[] data) => _connection.Write(CRC16(data), 0, data.Length + 2);
-        public void Send(byte[] data) => _connection.Write(data, 0, data.Length);
+        public void Send(byte[] data) => _connection.Write(CRC16(data), 0, data.Length + 2);
 
         /// <summary> Чтение данных из порта устройства.</summary>
         /// <remarks>

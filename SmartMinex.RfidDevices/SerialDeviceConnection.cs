@@ -57,9 +57,9 @@ namespace SmartMinex.Rfid
                 Parity = _setting.Parity,
                 DataBits = _setting.DataBits,
                 StopBits = _setting.StopBits,
-                Handshake = Handshake.None,
-                ReadTimeout = 1000,
-                WriteTimeout = 1000
+                //Handshake = Handshake.None,
+                //ReadTimeout = 100,
+                //WriteTimeout = 100
             };
             _serial.Open();
         }
@@ -80,31 +80,32 @@ namespace SmartMinex.Rfid
 
         public byte[]? Read()
         {
-            byte[]? data = null;
-            if (_serial.BytesToRead > 0)
-                try
+            var attempt = 0;
+            var prev = 0;
+            var pos = 0;
+            while (pos < BUFSIZE && attempt < 100)
+            {
+                pos += _serial.Read(_input, pos, BUFSIZE - pos);
+                if (pos == prev)
                 {
-                    int size = 0;
-                    while (size == 0 || _serial.BytesToRead > 0)
-                    {
-                        var cnt = _serial.Read(_input, size, BUFSIZE - size);
-                        size += cnt;
-                    }
-                    data = new byte[size];
-                    Buffer.BlockCopy(_input, 0, data, 0, size);
+                    Task.Delay(10);
                 }
-                catch (TimeoutException)
-                {
-                    data = null;
-                    throw;
-                }
-                catch (Exception)
-                {
-                    data = null;
-                    throw;
-                }
+                attempt++;
+                //  else attempt = 0;
+            }
+            //    }
+            //    catch (TimeoutException)
+            //    {
+            //        data = null;
+            //        throw;
+            //    }
+            //    catch (Exception)
+            //    {
+            //        data = null;
+            //        throw;
+            //    }
 
-            return data;
+            return pos == 0 ? null : _input[0..pos];
         }
     }
 }
