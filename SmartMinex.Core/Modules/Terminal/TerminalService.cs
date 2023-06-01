@@ -37,7 +37,7 @@ namespace SmartMinex.Runtime
             {
                 LastError = ex;
                 _listener = null;
-                Runtime.Send(MSG.ErrorMessage, 0, 0, ex);
+                Runtime.Send(MSG.ErrorMessage, ProcessId, 0, ex);
                 throw;
             }
             base.Start();
