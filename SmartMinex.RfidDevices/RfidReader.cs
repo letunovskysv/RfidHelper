@@ -91,23 +91,29 @@ namespace SmartMinex.Rfid
         }
 
         /// <summary> Чтение данных из очереди (SF=0x07).</summary>
-        public RfidTag[] ReadBuffer(int idBuffer)
+        public RfidTag[] ReadTags()
         {
-            Send(new byte[] { _address, 0x42, 0x07, (byte)(idBuffer >> 8), (byte)idBuffer, 0xFF }.ToArray());
-            Task.Delay(50);
-            var resp = Receive();
-            List<RfidTag> res = null;
-            if (resp != null)
+            List<RfidTag>? res = null;
+            int idBuffer = 0;
+            int cnt = 0;
+            do
             {
-                res = new List<RfidTag>();
-                var cnt = resp[5] + 5;
-                for (int i = 6; i < cnt;)
-                    res.Add(new RfidTag(
-                        (resp[i++] << 8) + resp[i++], // TagID (2 байта, big endian)
-                        resp[i++],
-                        resp[i++] / 10f
-                    ));
+                Send(new byte[] { _address, 0x42, 0x07, (byte)(idBuffer >> 8), (byte)idBuffer, 0xFF }.ToArray());
+                Task.Delay(50);
+                var resp = Receive();
+                if (resp != null)
+                {
+                    res = new List<RfidTag>();
+                    cnt = resp.Length;
+                    for (int i = 6; i < cnt;)
+                        res.Add(new RfidTag(
+                            (resp[i++] << 8) + resp[i++], // TagID (2 байта, big endian)
+                            resp[i++],
+                            resp[i++] / 10f
+                        ));
+                }
             }
+            while (cnt > 253);
             return res?.ToArray() ?? Array.Empty<RfidTag>();
         }
 
