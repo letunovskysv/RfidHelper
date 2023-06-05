@@ -1,6 +1,6 @@
 ﻿//--------------------------------------------------------------------------------------------------
 // (C) 2023-2023 UralTehIS, LLC. UTIS Smart System Platform. Version 2.0. All rights reserved.
-// Описание: RfidDeviceContext – Класс устройства.
+// Описание: RfidDeviceContext – Класс опроса устройств.
 //--------------------------------------------------------------------------------------------------
 namespace SmartMinex.Rfid
 {
@@ -11,21 +11,18 @@ namespace SmartMinex.Rfid
     using static System.Runtime.InteropServices.JavaScript.JSType;
     #endregion Using
 
-    public class RfidDeviceContext : IDevice
+    public class RfidDeviceContext
     {
         #region Declarations
 
         IDeviceConnection _connection;
-        byte _address;
 
         #endregion Declarations
 
         #region Properties
 
-        public long Id { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public string Code { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public string Name { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public string? Descript { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        /// <summary> Список устройств на линии.</summary>
+        public List<IDevice> Devices { get; } = new();
 
         #endregion Properties
 
@@ -39,7 +36,7 @@ namespace SmartMinex.Rfid
                 StopBits = System.IO.Ports.StopBits.One,
                 DataBits = 8
             });
-            _address = (byte)address;
+            Devices.Add(new RfidDevice(address));
         }
 
         public void Open()
@@ -115,9 +112,9 @@ namespace SmartMinex.Rfid
 
         /// <summary> Запись данных в порт устройства. Запрос данных.</summary>
         /// <param name="address"> адрес Modbus [1 … 247] </param>
-        public void Write(int operation, int idBuffer, byte[] data)
+        public void Write(int address, int operation, int idBuffer, byte[] data)
         {
-            var buf = new byte[] { _address, 0x42, (byte)operation, (byte)(idBuffer >> 8), (byte)idBuffer }.Concat(data).ToArray();
+            var buf = new byte[] { (byte)address, 0x42, (byte)operation, (byte)(idBuffer >> 8), (byte)idBuffer }.Concat(data).ToArray();
             Send(buf);
         }
 
@@ -127,24 +124,26 @@ namespace SmartMinex.Rfid
             List<RfidTag>? res = null;
             int idBuffer = 0;
             int cnt = 0;
-            do
-            {
-                Send(new byte[] { _address, 0x42, 0x07, (byte)(idBuffer >> 8), (byte)idBuffer, 0xFF }.ToArray());
-                Task.Delay(50);
-                var resp = Receive();
-                if (resp != null)
+            foreach (var dev in Devices.Cast<RfidDevice>())
+                do
                 {
-                    res = new List<RfidTag>();
-                    cnt = resp.Length;
-                    for (int i = 6; i < cnt;)
-                        res.Add(new RfidTag(
-                            (resp[i++] << 8) + resp[i++], // TagID (2 байта, big endian)
-                            resp[i++],
-                            resp[i++] / 10f
-                        ));
+                    Send(new byte[] { dev.Address, 0x42, 0x07, (byte)(idBuffer >> 8), (byte)idBuffer, 0xFF }.ToArray());
+                    Task.Delay(50);
+                    var resp = Receive();
+                    if (resp != null)
+                    {
+                        res = new List<RfidTag>();
+                        cnt = resp.Length;
+                        for (int i = 6; i < cnt;)
+                            res.Add(new RfidTag(
+                                (resp[i++] << 8) + resp[i++], // TagID (2 байта, big endian)
+                                resp[i++],
+                                resp[i++] / 10f
+                            ));
+                    }
                 }
-            }
-            while (cnt > 253);
+                while (cnt > 253);
+
             return res?.ToArray() ?? Array.Empty<RfidTag>();
         }
 

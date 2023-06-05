@@ -7,8 +7,6 @@ namespace SmartMinex.Rfid.Modules
     #region Using
     using System;
     using System.IO.Ports;
-    using System.Text;
-    using System.Xml.Linq;
     using SmartMinex.Runtime;
     #endregion Using
 
@@ -21,7 +19,10 @@ namespace SmartMinex.Rfid.Modules
         /// <summary> Адрес (modbus) на линии RS-485. 1 по умолчанмию.</summary>
         int _address;
 
-        readonly FileLogger _logger;
+        readonly ISmartLogger _logger;
+
+        /// <summary> Список линий.</summary>
+        readonly List<RfidDeviceContext> _context = new();
 
         #endregion Declarations
 

@@ -15,7 +15,7 @@ namespace SmartMinex.Runtime
     using Microsoft.Extensions.Logging;
     #endregion Using
 
-    public sealed class FileLogger : ILogger
+    public sealed class FileLogger : ISmartLogger
     {
         #region Declarations
 
@@ -176,15 +176,5 @@ namespace SmartMinex.Runtime
                     });
             });
         }
-
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool IsEnabled(LogLevel logLevel) => true;
-
-        public IDisposable? BeginScope<TState>(TState state) where TState : notnull =>
-            throw new NotImplementedException();
     }
 }
