@@ -39,12 +39,12 @@ namespace SmartMinex.Runtime
         /// <summary> Приём консольной команды.</summary>
         /// <remarks> LParam = ИД терминальной сессии; HParam = ИД процесса (модуля).</remarks>
         public const int ConsoleCommand = 0x0011;
-        /// <summary> Вывод в окно терминала по протоколу <em>Telnet</em>. HParam = ИД session.</summary>
-        /// <remarks> LParam = ИД процесса (модуля); HParam = ИД терминальной сессии; Data = text/int - 0x484F4C44 HOLD, 0x46524545 FREE.</remarks>
-        public const int Terminal = 0x0014;
         /// <summary> Вывод в окно терминала по протоколу <em>Telnet</em> без форматирования. HParam = ИД session.</summary>
         /// <remarks> LParam = ИД процесса (модуля); HParam = ИД терминальной сессии; Data = text/int - 0x484F4C44 HOLD, 0x46524545 FREE.</remarks>
-        public const int TerminalDirect = 0x0015;
+        public const int Terminal = 0x0014;
+        /// <summary> Вывод в окно терминала по протоколу <em>Telnet</em>. HParam = ИД session.</summary>
+        /// <remarks> LParam = ИД процесса (модуля); HParam = ИД терминальной сессии; Data = text/int - 0x484F4C44 HOLD, 0x46524545 FREE.</remarks>
+        public const int TerminalLine = 0x0015;
 
         /// <summary> Все сообщения.</summary>
         public const int All = 0x55555555;

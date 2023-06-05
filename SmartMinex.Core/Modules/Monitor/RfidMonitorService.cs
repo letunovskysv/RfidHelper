@@ -78,9 +78,9 @@ namespace SmartMinex.Rfid.Modules
                     break;
 
                 case "PORTS":
-                    Runtime.Send(MSG.Terminal, ProcessId, idTerminal, "Доступные порты: ");
+                    Runtime.Send(MSG.TerminalLine, ProcessId, idTerminal, "Доступные порты: ");
                     foreach (string portName in SerialPort.GetPortNames())
-                        Runtime.Send(MSG.Terminal, ProcessId, idTerminal, portName);
+                        Runtime.Send(MSG.TerminalLine, ProcessId, idTerminal, portName);
                     break;
             }
         }
@@ -92,16 +92,24 @@ namespace SmartMinex.Rfid.Modules
             try
             {
                 reader.Open();
-                Runtime.Send(MSG.Terminal, ProcessId, idTerminal, $"Поиск устройств на линии " + portName + ":");
+                Runtime.Send(MSG.TerminalLine, ProcessId, idTerminal, $"Поиск устройств на линии " + portName + ":");
+                int cnt = 0;
                 for (int addr = 1; addr < 255; addr++)
                     if (reader.TryGetName(addr, out var name))
-                        Runtime.Send(MSG.Terminal, ProcessId, idTerminal, $"Найдено устройство \"{name}\" по адресу {addr}");
+                    {
+                        Runtime.Send(MSG.TerminalLine, ProcessId, idTerminal, $"{TColor.STARTLINE}Найдено устройство \"{name}\" по адресу {addr}");
+                        cnt++;
+                    }
+                    else if (addr % 20 == 0)
+                        Runtime.Send(MSG.Terminal, ProcessId, idTerminal, TColor.STARTLINE + new string(' ', 20) + TColor.STARTLINE + ".");
                     else
-                        Runtime.Send(MSG.TerminalDirect, ProcessId, idTerminal, ".");
+                        Runtime.Send(MSG.Terminal, ProcessId, idTerminal, ".");
+
+                Runtime.Send(MSG.TerminalLine, ProcessId, idTerminal, TColor.STARTLINE + new string(' ', 20) + TColor.STARTLINE + $"Найдено {cnt} устройств.");
             }
             catch (Exception ex)
             {
-                Runtime.Send(MSG.Terminal, 0, 0, "Ошибка подключения к устройству " + ex.Message);
+                Runtime.Send(MSG.TerminalLine, 0, 0, "Ошибка подключения к устройству " + ex.Message);
             }
         }
 
@@ -111,12 +119,12 @@ namespace SmartMinex.Rfid.Modules
             try
             {
                 reader.Open();
-                Runtime.Send(MSG.Terminal, 0, 0, "Подключение к устройству выполнено успешно!");
+                Runtime.Send(MSG.TerminalLine, 0, 0, "Подключение к устройству выполнено успешно!");
                 reader.Close();
             }
             catch (Exception ex)
             {
-                Runtime.Send(MSG.Terminal, 0, 0, "Ошибка подключения к устройству " + ex.Message);
+                Runtime.Send(MSG.TerminalLine, 0, 0, "Ошибка подключения к устройству " + ex.Message);
             }
         }
 
@@ -130,20 +138,20 @@ namespace SmartMinex.Rfid.Modules
             }
             catch (Exception ex)
             {
-                Runtime.Send(MSG.Terminal, 0, 0, "Ошибка подключения к устройству. " + ex.Message);
+                Runtime.Send(MSG.TerminalLine, 0, 0, "Ошибка подключения к устройству. " + ex.Message);
             }
             try
             {
                 var resp = reader.Receive();
                 reader.Close();
                 if (resp == null)
-                    Runtime.Send(MSG.Terminal, 0, 0, "Данные не получены.");
+                    Runtime.Send(MSG.TerminalLine, 0, 0, "Данные не получены.");
                 else
-                    Runtime.Send(MSG.Terminal, 0, 0, "RX: " + string.Join(' ', resp.Select(n => "0x" + n.ToString("X2"))));
+                    Runtime.Send(MSG.TerminalLine, 0, 0, "RX: " + string.Join(' ', resp.Select(n => "0x" + n.ToString("X2"))));
             }
             catch (Exception ex)
             {
-                Runtime.Send(MSG.Terminal, 0, 0, "Ошибка получения данных. " + ex.Message);
+                Runtime.Send(MSG.TerminalLine, 0, 0, "Ошибка получения данных. " + ex.Message);
                 Runtime.Send(MSG.ErrorMessage, 0, 0, ex);
             }
         }

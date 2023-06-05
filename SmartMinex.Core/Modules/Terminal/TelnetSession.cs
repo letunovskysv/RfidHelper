@@ -68,7 +68,7 @@ namespace SmartMinex.Runtime
 
         public TelnetSession(IRuntime runtime, Socket client) : base(runtime)
         {
-            Subscribe = new[] { MSG.Terminal, MSG.TerminalDirect,
+            Subscribe = new[] { MSG.TerminalLine, MSG.Terminal,
                 MSG.InformMessage, MSG.WarningMessage, MSG.ErrorMessage, MSG.CriticalMessage };
 
             Name = "Терминальная сессия #" + _count++ + " " + ((IPEndPoint)client.RemoteEndPoint).Address.ToString();
@@ -125,8 +125,8 @@ namespace SmartMinex.Runtime
                             if (_proccessHolder == 0 || _proccessHolder == m.LParam) // При захвате консоли всё прочее игнорируем -->
                                 switch (m.Msg)
                                 {
+                                    case MSG.TerminalLine:
                                     case MSG.Terminal:
-                                    case MSG.TerminalDirect:
                                         if (m.HParam == 0 || m.HParam == ProcessId)
                                             if (m.Data is DataTable dt)
                                             {
@@ -141,7 +141,7 @@ namespace SmartMinex.Runtime
                                                 _channel.SendString(o.Append(NEWLINE).ToString());
                                             }
                                             else if (m.Data is string line)
-                                                _channel.SendString(m.Msg == MSG.TerminalDirect ? line : line + NEWLINE);
+                                                _channel.SendString(m.Msg == MSG.Terminal ? line : line + NEWLINE);
                                         break;
 
                                     case MSG.InformMessage:

@@ -60,7 +60,7 @@ namespace SmartMinex.Runtime
                             if (_rtm.Modules.Contains(m.LParam) && _rtm.Modules.GetProcess(m.LParam) is IModule mod1 && mod1.Status != RuntimeStatus.Running)
                             {
                                 mod1.Start();
-                                Runtime.Send(MSG.Terminal, 0, 0, "Запуск модуля: " + mod1.Name + ".\r\n");
+                                Runtime.Send(MSG.TerminalLine, 0, 0, "Запуск модуля: " + mod1.Name + ".\r\n");
                             }
                             break;
 
@@ -68,7 +68,7 @@ namespace SmartMinex.Runtime
                             if (_rtm.Modules.Contains(m.LParam) && _rtm.Modules.GetProcess(m.LParam) is IModule mod2 && mod2.Status != RuntimeStatus.Stopped)
                             {
                                 mod2.Stop();
-                                Runtime.Send(MSG.Terminal, 0, 0, "Остановка модуля: " + mod2.Name + ".\r\n");
+                                Runtime.Send(MSG.TerminalLine, 0, 0, "Остановка модуля: " + mod2.Name + ".\r\n");
                             }
                             break;
                     }
@@ -125,14 +125,14 @@ namespace SmartMinex.Runtime
 
                         if (type != null)
                         {
-                            Runtime.Send(MSG.Terminal, 0, 0, DateTime.Now.ToString("HH:mm:ss.fff") + " Создание модуля: " + modinfo.Name);
+                            Runtime.Send(MSG.TerminalLine, 0, 0, DateTime.Now.ToString("HH:mm:ss.fff") + " Создание модуля: " + modinfo.Name);
 
                             var startMod = rtm.Modules.AddSingleton(type, modinfo);
 
                             if (startMod != null && startMod.Status == RuntimeStatus.StartPending)
                             {
                                 startMod.Id = modinfo.Id;
-                                Runtime.Send(MSG.Terminal, 0, 0, DateTime.Now.ToString("HH:mm:ss.fff") + " Запуск модуля: " + modinfo.Name);
+                                Runtime.Send(MSG.TerminalLine, 0, 0, DateTime.Now.ToString("HH:mm:ss.fff") + " Запуск модуля: " + modinfo.Name);
                             }
                         }
                         else
