@@ -1,16 +1,17 @@
 ﻿//--------------------------------------------------------------------------------------------------
 // (C) 2023-2023 UralTehIS, LLC. UTIS Smart System Platform. Version 2.0. All rights reserved.
-// Описание: RfidReader – Класс устройства.
+// Описание: RfidDeviceContext – Класс устройства.
 //--------------------------------------------------------------------------------------------------
 namespace SmartMinex.Rfid
 {
     #region Using
     using SmartMinex.Data;
     using System;
+    using System.Text;
     using static System.Runtime.InteropServices.JavaScript.JSType;
     #endregion Using
 
-    public class RfidReader : IDevice
+    public class RfidDeviceContext : IDevice
     {
         #region Declarations
 
@@ -28,7 +29,7 @@ namespace SmartMinex.Rfid
 
         #endregion Properties
 
-        public RfidReader(string portName, int address)
+        public RfidDeviceContext(string portName, int address)
         {
             _connection = new SerialDeviceConnection(new SerialPortSetting()
             {
@@ -51,6 +52,19 @@ namespace SmartMinex.Rfid
             _connection.Close();
         }
 
+        /// <summary> Проверка доступности устройства.</summary>
+        public bool TryGetName(int address, out string? name)
+        {
+            var resp = Request(address, 0x43, 0x01, Encoding.ASCII.GetBytes("\xfe\x0dGetDeviceName"));
+            if (resp != null && resp.Length > 6)
+            {
+                name = string.Join(' ', resp.Select(n => n.ToString("X2"))); // Encoding.ASCII.GetString(resp, 6, resp[3] - 2);
+                return true;
+            }
+            name = null;
+            return false;
+        }
+
         #region Команды операций с буферами данных и сообщений
 
         /// <summary> Прямая запись в последовательный порт. Добавляется контрольная сумма CRC16.</summary>
@@ -63,6 +77,13 @@ namespace SmartMinex.Rfid
         /// CRC16: контрольная сумма ModbusRTU
         /// </remarks>
         public void Send(byte[] data) => _connection.Write(CRC16(data), 0, data.Length + 2);
+
+        public byte[]? Request(int address, int command, int operation, byte[] data)
+        {
+            Send(new byte[] { (byte)address, (byte)command, (byte)operation, (byte)data.Length }.Concat(data).ToArray());
+            Task.Delay(1000);
+            return Receive();
+        }
 
         /// <summary> Чтение данных из порта устройства.</summary>
         /// <remarks>

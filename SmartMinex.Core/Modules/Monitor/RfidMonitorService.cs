@@ -8,6 +8,7 @@ namespace SmartMinex.Rfid.Modules
     using System;
     using System.IO.Ports;
     using System.Text;
+    using System.Xml.Linq;
     using SmartMinex.Runtime;
     #endregion Using
 
@@ -20,6 +21,8 @@ namespace SmartMinex.Rfid.Modules
         /// <summary> Адрес (modbus) на линии RS-485. 1 по умолчанмию.</summary>
         int _address;
 
+        readonly FileLogger _logger;
+
         #endregion Declarations
 
         public RfidMonitorService(IRuntime runtime, string port, int? address) : base(runtime)
@@ -27,6 +30,7 @@ namespace SmartMinex.Rfid.Modules
             Subscribe = new[] { MSG.ConsoleCommand };
             _port = port;
             _address = address ?? 1;
+            _logger = new FileLogger(@"logs\rfiddevice.log");
         }
 
         protected override async Task ExecuteProcess()
@@ -61,7 +65,7 @@ namespace SmartMinex.Rfid.Modules
             {
                 case "FIND":
                 case "SEARCH":
-                    Search();
+                    Search(idTerminal, args.Length > 1 ? args[1] : _port);
                     break;
 
                 case "CONNECT":
@@ -80,25 +84,29 @@ namespace SmartMinex.Rfid.Modules
             }
         }
 
-        void Search()
+        /// <summary> Найдём все устройства на линии.</summary>
+        void Search(long idTerminal, string portName)
         {
-            var reader = new RfidReader(_port, _address);
+            var reader = new RfidDeviceContext(portName, _address);
             try
             {
                 reader.Open();
-                Runtime.Send(MSG.Terminal, 0, 0, "Подключение к устройству выполнено успешно!");
-                reader.Close();
+                Runtime.Send(MSG.Terminal, ProcessId, idTerminal, $"Поиск устройств на линии " + portName + ":");
+                for (int addr = 1; addr < 255; addr++)
+                    if (reader.TryGetName(addr, out var name))
+                        Runtime.Send(MSG.Terminal, ProcessId, idTerminal, $"Найдено устройство \"{name}\" по адресу {addr}");
+                    else
+                        Runtime.Send(MSG.TerminalDirect, ProcessId, idTerminal, ".");
             }
             catch (Exception ex)
             {
                 Runtime.Send(MSG.Terminal, 0, 0, "Ошибка подключения к устройству " + ex.Message);
             }
-
         }
 
         void Connect()
         {
-            var reader = new RfidReader(_port, _address);
+            var reader = new RfidDeviceContext(_port, _address);
             try
             {
                 reader.Open();
@@ -113,7 +121,7 @@ namespace SmartMinex.Rfid.Modules
 
         void Send(byte[] data)
         {
-            var reader = new RfidReader(_port, _address);
+            var reader = new RfidDeviceContext(_port, _address);
             try
             {
                 reader.Open();

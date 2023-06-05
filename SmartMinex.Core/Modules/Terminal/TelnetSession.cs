@@ -68,7 +68,7 @@ namespace SmartMinex.Runtime
 
         public TelnetSession(IRuntime runtime, Socket client) : base(runtime)
         {
-            Subscribe = new[] { MSG.Terminal,
+            Subscribe = new[] { MSG.Terminal, MSG.TerminalDirect,
                 MSG.InformMessage, MSG.WarningMessage, MSG.ErrorMessage, MSG.CriticalMessage };
 
             Name = "Терминальная сессия #" + _count++ + " " + ((IPEndPoint)client.RemoteEndPoint).Address.ToString();
@@ -126,6 +126,7 @@ namespace SmartMinex.Runtime
                                 switch (m.Msg)
                                 {
                                     case MSG.Terminal:
+                                    case MSG.TerminalDirect:
                                         if (m.HParam == 0 || m.HParam == ProcessId)
                                             if (m.Data is DataTable dt)
                                             {
@@ -139,8 +140,8 @@ namespace SmartMinex.Runtime
                                                 PrintDictionary(o, dict);
                                                 _channel.SendString(o.Append(NEWLINE).ToString());
                                             }
-                                            else
-                                                _channel.SendString((m.Data?.ToString() ?? "<пустое сообщение>") + NEWLINE);
+                                            else if (m.Data is string line)
+                                                _channel.SendString(m.Msg == MSG.TerminalDirect ? line : line + NEWLINE);
                                         break;
 
                                     case MSG.InformMessage:
