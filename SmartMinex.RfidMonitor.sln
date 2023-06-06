@@ -8,8 +8,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution", "Solution", "{9F
 		SmartMinex.RfidHelper.1.0.csproj = SmartMinex.RfidHelper.1.0.csproj
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartMinex.RfidDevices", "SmartMinex.RfidDevices\SmartMinex.RfidDevices.csproj", "{1C363111-1AE8-4B0E-95E3-7F587B5688F0}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartMinex.RfidService", "SmartMinex.RfidService\SmartMinex.RfidService.csproj", "{A7413F72-5C34-4D7A-A1DF-B64431C6C092}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartMinex.RfidStorage", "SmartMinex.RfidStorage\SmartMinex.RfidStorage.csproj", "{1CC857BA-FEF8-4113-A2FD-BFEE046247F4}"
@@ -18,7 +16,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartMinex.Runtime", "Smart
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartMinex.Core", "SmartMinex.Core\SmartMinex.Core.csproj", "{D13F59E6-CD6C-4A43-929B-7E94F8792967}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartMinex.Test", "SmartMinex.Test\SmartMinex.Test.csproj", "{A8031FC1-B563-4E40-9578-566D86FC972C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartMinex.Test", "SmartMinex.Test\SmartMinex.Test.csproj", "{A8031FC1-B563-4E40-9578-566D86FC972C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,10 +24,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1C363111-1AE8-4B0E-95E3-7F587B5688F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1C363111-1AE8-4B0E-95E3-7F587B5688F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1C363111-1AE8-4B0E-95E3-7F587B5688F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1C363111-1AE8-4B0E-95E3-7F587B5688F0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A7413F72-5C34-4D7A-A1DF-B64431C6C092}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A7413F72-5C34-4D7A-A1DF-B64431C6C092}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A7413F72-5C34-4D7A-A1DF-B64431C6C092}.Release|Any CPU.ActiveCfg = Release|Any CPU

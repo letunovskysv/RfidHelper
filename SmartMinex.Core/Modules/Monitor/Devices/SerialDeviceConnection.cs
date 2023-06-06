@@ -14,6 +14,7 @@ namespace SmartMinex.Rfid
         void Close();
         void Write(byte[] buffer, int offset, int count);
         byte[]? Read();
+        bool Connected { get; }
     }
 
     public struct SerialPortSetting
@@ -40,6 +41,8 @@ namespace SmartMinex.Rfid
 
         SerialPortSetting _setting;
         SerialPort _serial;
+
+        public bool Connected => _serial?.IsOpen ?? false;
 
         public SerialDeviceConnection(SerialPortSetting setting)
         {

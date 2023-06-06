@@ -15,7 +15,7 @@ namespace SmartMinex.Runtime
     using Microsoft.Extensions.Logging;
     #endregion Using
 
-    public sealed class FileLogger : ISmartLogger
+    public sealed class FileLogger : IxLogger
     {
         #region Declarations
 

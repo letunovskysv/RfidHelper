@@ -7,7 +7,6 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\SmartMinex.RfidDevices\SmartMinex.RfidDevices.csproj" />
     <ProjectReference Include="..\SmartMinex.RfidStorage\SmartMinex.RfidStorage.csproj" />
   </ItemGroup>
   
@@ -18,6 +17,13 @@
   
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
+    <PackageReference Include="System.IO.Ports" Version="7.0.0" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Update="Modules\Monitor\Devices\commands.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
