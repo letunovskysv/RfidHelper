@@ -7,9 +7,7 @@ namespace SmartMinex.Rfid.Modules
     #region Using
     using System;
     using System.IO.Ports;
-    using System.Reflection.PortableExecutable;
-    using System.Text;
-    using Microsoft.Extensions.Logging;
+    using System.Reflection;
     using SmartMinex.Runtime;
     #endregion Using
 
@@ -27,7 +25,7 @@ namespace SmartMinex.Rfid.Modules
         readonly IxLogger _logger;
 
         /// <summary> Список линий.</summary>
-        readonly List<RfidAnchorReader> _context = new();
+        readonly List<RfidAnchorReader> _readers = new();
 
         #endregion Declarations
 
@@ -43,7 +41,7 @@ namespace SmartMinex.Rfid.Modules
         protected override async Task ExecuteProcess()
         {
             Status = RuntimeStatus.Running;
-            _context.Add(new RfidAnchorReader(_port, _address, _logger));
+            _readers.Add(new RfidAnchorReader(_port, _address, _logger));
             Open();
             while (_sync.WaitOne() && (Status & RuntimeStatus.Loop) > 0)
                 try
@@ -88,15 +86,34 @@ namespace SmartMinex.Rfid.Modules
                     break;
 
                 case "DEV":
-                    if (args.Length > 1 && int.TryParse(args[1], out int addr))
-                        ReadInfo(idTerminal, addr);
+                    if (args.Length > 1)
+                    {
+                        if (int.TryParse(args[1], out int addr))
+                            ReadInfo(idTerminal, addr);
+                    }
+                    else
+                        Runtime.Send(MSG.TerminalLine, ProcessId, idTerminal, string.Join("\r\n", _readers.First().Devices.Select(d => d.Name)));
+                    break;
+
+                case "TAGS":
+                    if (args.Length > 1 && int.TryParse(args[1], out int addr2))
+                        ReadTags(idTerminal, addr2);
+                    break;
+
+                case "?":
+                case "HELP":
+                    OnHelp(idTerminal);
+                    break;
+
+                default:
+                    Runtime.Send(MSG.TerminalLine, ProcessId, idTerminal, $"Неверная команда: " + string.Join(' ', args));
                     break;
             }
         }
 
         void Open()
         {
-            foreach (var ctx in _context)
+            foreach (var ctx in _readers)
                 if (!ctx.Connected)
                     if (ctx.Open())
                         Runtime.Send(MSG.TerminalLine, 0, 0, "Подключение к устройству выполнено успешно!");
@@ -107,7 +124,7 @@ namespace SmartMinex.Rfid.Modules
         /// <summary> Найдём все устройства на линии.</summary>
         void Search(long idTerminal, string portName)
         {
-            var readers = _context.First();
+            var readers = _readers.First();
             try
             {
                 Runtime.Send(MSG.TerminalLine, ProcessId, idTerminal, $"Поиск устройств на линии " + portName + ":");
@@ -133,7 +150,7 @@ namespace SmartMinex.Rfid.Modules
 
         void ReadInfo(long idTerminal, int address)
         {
-            var dev = _context.FirstOrDefault()?.ReadInfo(address);
+            var dev = _readers.FirstOrDefault()?.ReadInfo(address);
             if (dev != null)
                 Runtime.Send(MSG.TerminalLine, ProcessId, idTerminal, new Dictionary<string, string>()
                 {
@@ -162,10 +179,11 @@ namespace SmartMinex.Rfid.Modules
 
         void Send(byte[] data)
         {
-            var line = _context.First();
-            if (!line.Connected && line.Open())
+            var line = _readers.First();
+            if (line.Connected || line.Open())
                 try
                 {
+                    line.Send(data);
                     var resp = line.Receive();
                     if (resp == null)
                         Runtime.Send(MSG.TerminalLine, 0, 0, "Данные не получены.");
@@ -177,6 +195,25 @@ namespace SmartMinex.Rfid.Modules
                     Runtime.Send(MSG.TerminalLine, 0, 0, "Ошибка получения данных. " + ex.Message);
                     Runtime.Send(MSG.ErrorMessage, 0, 0, ex);
                 }
+        }
+
+        void ReadTags(long idTerminal, int address)
+        {
+            var tags = _readers.FirstOrDefault()?.ReadTagsFromBuffer().Select(t => t.ToString());
+            if (tags != null)
+                Runtime.Send(MSG.TerminalLine, ProcessId, idTerminal, "Найдено " + tags.Count() + " RFID-меток:\r\n" + string.Join("\r\n", tags));
+        }
+
+        void OnHelp(long idTerminal)
+        {
+            var asm = Assembly.GetAssembly(typeof(RfidMonitorService));
+            var name = asm.GetManifestResourceNames().FirstOrDefault(r => r.EndsWith(nameof(RfidMonitorService) + ".man"));
+            if (name != null)
+            {
+                using var ms = asm.GetManifestResourceStream(name);
+                using var reader = new StreamReader(ms);
+                Runtime.Send(MSG.TerminalLine, ProcessId, idTerminal, reader.ReadToEnd());
+            }
         }
     }
 }

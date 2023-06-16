@@ -5,6 +5,14 @@
   <PropertyGroup>
     <RootNamespace>SmartMinex.Runtime</RootNamespace>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Modules\Monitor\RfidMonitorService.man" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Modules\Monitor\RfidMonitorService.man" />
+  </ItemGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\SmartMinex.RfidStorage\SmartMinex.RfidStorage.csproj" />

@@ -117,12 +117,15 @@ namespace SmartMinex.Rfid
                 dev.SrvAnqVpl = GetValueHex(address, CMD_SRV_ANQ_VPL) ?? string.Empty;
                 dev.ModbusVersion = GetValueHex(address, CMD_MODBUS_VER) ?? string.Empty;
                 dev.AnchorCRC = GetValueHex(address, CMD_ANCHOR_CRC) ?? string.Empty;
+                dev.OperatingTimeStarted = GetValueInt(address, CMD_OPERTIME_STARTED);
+                dev.OperatingTimeGeneral = GetValueInt(address, CMD_OPERTIME_GENERAL);
+
                 var ym = GetValueHex(address, CMD_STARTED_YEAR_MONTH);
                 var dh = GetValueHex(address, CMD_STARTED_DAY_HOUR);
                 var ms = GetValueHex(address, CMD_STARTED_MIN_SEC);
-                dev.Started = DateTime.TryParse(string.Concat(dh[2..4], ".", ym[4..6], ".20", ym[2..4], " ", dh[4..6], ":", ms[2..4], ":", ms[4..6]), out var dt) ? dt : null;
-                dev.OperatingTimeStarted = GetValueInt(address, CMD_OPERTIME_STARTED);
-                dev.OperatingTimeGeneral = GetValueInt(address, CMD_OPERTIME_GENERAL);
+                if (ym != null && dh != null && ms != null)
+                    dev.Started = DateTime.TryParse(string.Concat(dh[2..4], ".", ym[4..6], ".20", ym[2..4], " ", dh[4..6], ":", ms[2..4], ":", ms[4..6]), out var dt) ? dt : null;
+         
                 return dev;
             }
             return null;
@@ -222,7 +225,7 @@ namespace SmartMinex.Rfid
         public RfidTag[] ReadTagsFromBuffer()
         {
             List<RfidTag>? res = null;
-            int idBuffer = 0;
+            int idBuffer = 0x16;
             int cnt = 0;
             foreach (var dev in Devices.Cast<RfidAnchor>())
                 do
@@ -303,7 +306,7 @@ namespace SmartMinex.Rfid
 
         public override string ToString()
         {
-            return $"{TagId}, {Battery} В";
+            return $"{TagId}, {Battery} В, {Flags}";
         }
     }
 
