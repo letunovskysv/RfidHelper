@@ -35,7 +35,8 @@
     {
       "name": "Клиентская служба доступа к данным",
       "type": "SmartMinex.Web.RfidClientService, SmartMinex.Web",
-      "start": "auto"
+      "start": "auto",
+      "port": 8000
     }
   ]
 }

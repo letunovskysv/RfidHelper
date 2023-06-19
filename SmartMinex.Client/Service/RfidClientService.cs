@@ -6,41 +6,51 @@ namespace SmartMinex.Web
 {
     #region Using
     using System;
+    using System.Reflection;
     using SmartMinex.Runtime;
+    using SmartMinex.Web.Data;
     #endregion Using
 
     internal class RfidClientService : TModule
     {
         #region Declarations
 
+        readonly CancellationTokenSource _webhost = new CancellationTokenSource();
+
+        public int Port { get; set; }
+
         #endregion Declarations
 
-        public RfidClientService(IRuntime runtime) : base(runtime)
+        public RfidClientService(IRuntime runtime, string schema, int? port) : base(runtime)
         {
             Subscribe = new[] { MSG.ConsoleCommand };
+            Port = port ?? 80; // default HTTP port
         }
 
         protected override async Task ExecuteProcess()
         {
-            Status = RuntimeStatus.Running;
-            while (_sync.WaitOne() && (Status & RuntimeStatus.Loop) > 0)
-                try
+            await Host.CreateDefaultBuilder()
+                .UseContentRoot(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location))
+                .ConfigureWebHostDefaults(host =>
                 {
-                    while (_esb.TryDequeue(out TMessage m))
+                    host.UseKestrel();
+                    host.ConfigureKestrel(opt =>
                     {
-                        switch (m.Msg)
+                        opt.ListenAnyIP(Port, listen =>
                         {
-                            case MSG.ConsoleCommand:
-                                break;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Runtime.Send(MSG.ErrorMessage, ProcessId, 0, ex);
-                }
+                          //  listen.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2;
+                        });
+                    });
+                    host.ConfigureServices((srv) =>
+                    {
+                        srv.AddDistributedMemoryCache();
+                    });
+                    host.UseStartup<SmartWebServer>();
+                })
+                .Build()
+                .RunAsync(_webhost.Token);
 
-            await base.ExecuteProcess();
+            Status = RuntimeStatus.Running;
         }
     }
 }
