@@ -19,8 +19,8 @@ namespace SmartMinex.Rfid.Modules
 
         /// <summary> Имя COM-порта.</summary>
         string _port;
-        /// <summary> Адрес (modbus) на линии RS-485. 1 по умолчанмию.</summary>
-        int _address;
+        /// <summary> Устройства (из конфигурации).</summary>
+        TDevice[] _init_devices;
 
         readonly IxLogger _logger;
 
@@ -29,11 +29,11 @@ namespace SmartMinex.Rfid.Modules
 
         #endregion Declarations
 
-        public RfidMonitorService(IRuntime runtime, string port, int? address) : base(runtime)
+        public RfidMonitorService(IRuntime runtime, string port, TDevice[]? devices) : base(runtime)
         {
             Subscribe = new[] { MSG.ConsoleCommand };
             _port = port;
-            _address = address ?? 1;
+            _init_devices = devices;
             _logger = new FileLogger(@"logs\rfiddevice.log");
             _logger.WriteLine("****************************************************************************************************");
         }
@@ -41,7 +41,7 @@ namespace SmartMinex.Rfid.Modules
         protected override async Task ExecuteProcess()
         {
             Status = RuntimeStatus.Running;
-            _readers.Add(new RfidAnchorReader(_port, _address, _logger));
+            _readers.Add(new RfidAnchorReader(_port, _logger, _init_devices));
             Open();
             while (_sync.WaitOne() && (Status & RuntimeStatus.Loop) > 0)
                 try
@@ -173,7 +173,8 @@ namespace SmartMinex.Rfid.Modules
                     { "AnchorSettings CRC-16", dev.AnchorCRC },
                     { "Дата/Время запуска", dev.Started.HasValue ? dev.Started.Value.ToString() : NULL },
                     { "Наработка после старта", dev.OperatingTimeStarted.HasValue ? dev.OperatingTimeStarted.Value.ToString() : NULL },
-                    { "Общая наработка", dev.OperatingTimeGeneral.HasValue ? dev.OperatingTimeGeneral.Value.ToString() : NULL }
+                    { "Общая наработка", dev.OperatingTimeGeneral.HasValue ? dev.OperatingTimeGeneral.Value.ToString() : NULL },
+                    { "Состояние", dev.State.ToDescription() }
                 });
         }
 

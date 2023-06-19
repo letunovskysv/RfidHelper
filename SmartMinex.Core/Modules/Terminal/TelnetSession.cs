@@ -333,9 +333,8 @@ namespace SmartMinex.Runtime
 
         bool ValidateUser(string username, string password)
         {
-            if (username == "admin" && password == "4rfvgy7") return true; // TODO: Временное решение
-
-            return false;
+            var usr = ((SmartRuntimeService)Runtime).Users.FirstOrDefault(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
+            return usr != null && password == usr.Password;
         }
 
         static void PrintDictionary(StringBuilder output, Dictionary<string, string> data, string separator = " | ")

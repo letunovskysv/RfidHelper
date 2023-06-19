@@ -75,7 +75,7 @@ namespace SmartMinex.Runtime
 
                     if (injectionType == null)
                     {
-                        object pval = modinfo?[prm.Name];
+                        object pval = modinfo?[prm.Name, prm.ParameterType];
                         prms[i] = (args.Length > n && ptype == args[n].GetType())
                             ? args[n]
                             : pval != null
@@ -216,7 +216,8 @@ namespace SmartMinex.Runtime
 
         IConfigurationSection _cfg;
 
-        public string this[string name] => _cfg.GetSection(name).Value;
+        public string? this[string name] =>_cfg.GetSection(name)?.Value;
+        public object? this[string name, Type type] => _cfg.GetSection(name).Get(type);
         public object Get(Type type, string name)
         {
             object res = Activator.CreateInstance(type);

@@ -6,6 +6,7 @@ namespace SmartMinex.Rfid
 {
     #region Using
     using SmartMinex.Data;
+    using SmartMinex.Rfid.Modules;
     using SmartMinex.Runtime;
     using System;
     using System.Text;
@@ -41,7 +42,8 @@ namespace SmartMinex.Rfid
         static readonly byte[] CMD_OPERTIME_STARTED = new byte[] { 0x04, 0x00, 0x0e, 0x00, 0x02 };
         static readonly byte[] CMD_OPERTIME_GENERAL = new byte[] { 0x04, 0x00, 0x10, 0x00, 0x02 };
 
-        IxLogger _logger;
+        readonly object _syncRoot = new();
+        readonly IxLogger _logger;
         IDeviceConnection _connection;
 
         #endregion Declarations
@@ -57,7 +59,7 @@ namespace SmartMinex.Rfid
 
         #endregion Properties
 
-        public RfidAnchorReader(string portName, int address, IxLogger logger)
+        public RfidAnchorReader(string portName, IxLogger logger, TDevice[] devices)
         {
             _connection = new SerialDeviceConnection(new SerialPortSetting()
             {
@@ -67,15 +69,19 @@ namespace SmartMinex.Rfid
                 StopBits = System.IO.Ports.StopBits.One,
                 DataBits = 8
             });
-            Devices.Add(new RfidAnchor(address));
             _logger = logger;
+            devices.ToList().ForEach(dev => AddDevice(dev.Address));
         }
+
+        public void AddDevice(int address) =>
+            Devices.Add(new RfidAnchor(address));
 
         public bool Open()
         {
             try
             {
                 _connection.Open();
+                InitAsync().ConfigureAwait(false);
                 return true;
             }
             catch (Exception ex)
@@ -89,6 +95,12 @@ namespace SmartMinex.Rfid
         {
             _connection.Close();
         }
+
+        async Task InitAsync() => await Task.Run(() =>
+        {
+            lock (_syncRoot)
+                Devices.ForEach(d => ReadInfo(((RfidAnchor)d).Address));
+        });
 
         /// <summary> Возвращает наименование устройства. Проверка доступности устройства.</summary>
         public bool TryGetName(int address, out string? name)
@@ -125,7 +137,9 @@ namespace SmartMinex.Rfid
                 var ms = GetValueHex(address, CMD_STARTED_MIN_SEC);
                 if (ym != null && dh != null && ms != null)
                     dev.Started = DateTime.TryParse(string.Concat(dh[2..4], ".", ym[4..6], ".20", ym[2..4], " ", dh[4..6], ":", ms[2..4], ":", ms[4..6]), out var dt) ? dt : null;
-         
+
+                dev.LastPolling = DateTime.Now;
+                dev.State = DeviceState.Ready;
                 return dev;
             }
             return null;

@@ -6,13 +6,25 @@
       "type": "SmartMinex.Data.SqlLiteDatabase"
     }
   ],
+  "users": [
+    {
+      "name": "Администратор",
+      "username": "admin",
+      "password": "4rfvgy7"
+    }
+  ],
   "modules": [
     {
       "name": "Служба опроса",
       "type": "SmartMinex.Rfid.Modules.RfidMonitorService, SmartMinex.Core",
       "start": "auto",
       "port": "COM1",
-      "address": 2
+      "devices": [
+        {
+          "name": "БОМ",
+          "address": 2
+        }
+      ]
     }
   ]
 }

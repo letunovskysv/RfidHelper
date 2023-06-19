@@ -46,6 +46,10 @@ namespace SmartMinex.Rfid
         public int? OperatingTimeStarted { get; set; }
         public int? OperatingTimeGeneral { get; set; }
 
+        /// <summary> Дата/Время последнего опроса.</summary>
+        public DateTime LastPolling { get; set; }
+        public DeviceState State { get; set; }
+
         #endregion Properties
 
         public RfidAnchor(int address)

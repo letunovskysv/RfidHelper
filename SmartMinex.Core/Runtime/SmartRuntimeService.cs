@@ -12,6 +12,7 @@ namespace SmartMinex.Runtime
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
+    using SmartMinex.Rfid.Modules;
     #endregion Using
 
     public sealed class SmartRuntimeService : BackgroundService, IRuntime
@@ -44,6 +45,8 @@ namespace SmartMinex.Runtime
         public IMetadata Metadata => throw new NotImplementedException();
         public Version Version => throw new NotImplementedException();
 
+        public readonly TUser[] Users;
+
         #endregion Properties
 
         public SmartRuntimeService(ILogger<SmartRuntimeService> logger, IConfiguration config)
@@ -56,6 +59,8 @@ namespace SmartMinex.Runtime
             Modules = new ModuleManager(this, config, logger);
             Modules.Created += OnModuleCreated;
             Modules.Removed += OnModuleRemoved;
+
+            Users = config.GetSection("runtimeOptions:users").Get<TUser[]>();
         }
 
         protected override async Task ExecuteAsync(CancellationToken tkn)
