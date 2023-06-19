@@ -21,8 +21,8 @@
       "serial": {
         "name": "COM1",
         "baudrate": 38400,
-        "parity": "Even",
-        "stopbits": "One",
+        "parity": 2,
+        "stopbits": 1,
         "databits": 8
       },
       "devices": [
