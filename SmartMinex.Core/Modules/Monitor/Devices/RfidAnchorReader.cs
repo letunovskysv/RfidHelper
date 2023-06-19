@@ -330,7 +330,7 @@ namespace SmartMinex.Rfid
         }
 
         public override string ToString() =>
-            $"{TagId,6},{(BatteryFault ? "неиспр." : Battery + " В"),7},{Convert.ToString((int)Flags, 2).PadLeft(8, '0'),9} {(RfidTagFlags)((int)Flags & 0x80)}";
+            $"{TagId,7},{(BatteryFault ? "неиспр." : Battery + " В"),7},{Convert.ToString((int)Flags, 2).PadLeft(8, '0'),9} {(RfidTagFlags)((int)Flags & 0x80)}";
     }
 
     /// <summary> Флаги телеметрии метки.</summary>

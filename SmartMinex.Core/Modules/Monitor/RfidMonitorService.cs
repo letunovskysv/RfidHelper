@@ -203,7 +203,7 @@ namespace SmartMinex.Rfid.Modules
         {
             var tags = _readers.FirstOrDefault()?.ReadTagsFromBuffer().Select(t => t.ToString());
             if (tags != null)
-                Runtime.Send(MSG.TerminalLine, ProcessId, idTerminal, "Найдено " + tags.Count() + " RFID-меток:\r\n Номер Батарея   Флаги\r\n" + string.Join("\r\n", tags));
+                Runtime.Send(MSG.TerminalLine, ProcessId, idTerminal, "Найдено " + tags.Count() + " RFID-меток:\r\n  Номер Батарея   Флаги\r\n" + string.Join("\r\n", tags));
         }
 
         void OnHelp(long idTerminal)

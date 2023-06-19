@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SmartMinex.Client\SmartMinex.Client.csproj" />
     <ProjectReference Include="..\SmartMinex.Core\SmartMinex.Core.csproj" />
     <ProjectReference Include="..\SmartMinex.RfidStorage\SmartMinex.RfidStorage.csproj" />
   </ItemGroup>

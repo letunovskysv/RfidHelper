@@ -4,6 +4,14 @@
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <OutputType>Library</OutputType>
+    <Description>Информационный сервер</Description>
+    <RootNamespace>SmartMinex.Web</RootNamespace>
+    <AssemblyName>SmartMinex.Web</AssemblyName>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SmartMinex.Runtime\SmartMinex.Runtime.csproj" />
+  </ItemGroup>
 
 </Project>

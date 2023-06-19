@@ -31,6 +31,11 @@
           "address": 2
         }
       ]
+    },
+    {
+      "name": "Клиентская служба доступа к данным",
+      "type": "SmartMinex.Web.RfidClientService, SmartMinex.Web",
+      "start": "auto"
     }
   ]
 }

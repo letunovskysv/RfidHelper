@@ -1,4 +1,4 @@
-namespace SmartMinex.Client.Data
+namespace SmartMinex.Web.Data
 {
     public class WeatherForecastService
     {
