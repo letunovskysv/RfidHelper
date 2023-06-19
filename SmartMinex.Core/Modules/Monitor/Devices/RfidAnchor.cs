@@ -50,6 +50,10 @@ namespace SmartMinex.Rfid
         public DateTime LastPolling { get; set; }
         public DeviceState State { get; set; }
 
+        /// <summary> Режим ответа RTLS (Holding Register 0x003A).</summary>
+        /// <remarks> Задаёт сценарий общения считывателя с МТП по RTLS каналу.</remarks>
+        public int RtlsMode { get; set; }
+
         #endregion Properties
 
         public RfidAnchor(int address)

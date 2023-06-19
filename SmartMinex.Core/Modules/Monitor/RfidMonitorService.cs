@@ -174,7 +174,8 @@ namespace SmartMinex.Rfid.Modules
                     { "Дата/Время запуска", dev.Started.HasValue ? dev.Started.Value.ToString() : NULL },
                     { "Наработка после старта", dev.OperatingTimeStarted.HasValue ? dev.OperatingTimeStarted.Value.ToString() : NULL },
                     { "Общая наработка", dev.OperatingTimeGeneral.HasValue ? dev.OperatingTimeGeneral.Value.ToString() : NULL },
-                    { "Состояние", dev.State.ToDescription() }
+                    { "Состояние", dev.State.ToDescription() },
+                    { "Режим ответа RTLS", dev.RtlsMode.ToString() }
                 });
         }
 

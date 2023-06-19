@@ -124,6 +124,7 @@ namespace SmartMinex.Rfid
                 dev.AnchorCRC = GetValueHex(address, CMD_ANCHOR_CRC) ?? string.Empty;
                 dev.OperatingTimeStarted = GetValueInt(address, CMD_OPERTIME_STARTED);
                 dev.OperatingTimeGeneral = GetValueInt(address, CMD_OPERTIME_GENERAL);
+                dev.RtlsMode = ReadHoldingRegister(address, 0x003a).Value + 1;
 
                 var ym = GetValueHex(address, CMD_STARTED_YEAR_MONTH);
                 var dh = GetValueHex(address, CMD_STARTED_DAY_HOUR);
@@ -165,6 +166,22 @@ namespace SmartMinex.Rfid
                 return BitConverter.ToInt32(resp[3..].Reverse().ToArray());
 
             return null;
+        }
+
+        /// <summary> Чтение 16-разрядного регистра Modbus.</summary>
+        int? ReadHoldingRegister(int address, int start)
+        {
+            var resp = Request(address, new byte[] { 0x03, (byte)(start >> 8), (byte)start, 0x00, 0x01 });
+            return resp == null ? null : (resp[3] << 8) + resp[4];
+        }
+
+        /// <summary> Чтение 16-разрядных регистров Modbus.</summary>
+        IEnumerable<int>? ReadHoldingRegisters(int address, int start, int count)
+        {
+            var resp = Request(address, new byte[] { 0x03, (byte)(start >> 8), (byte)start, (byte)(count >> 8), (byte)count });
+            if (resp != null)
+                for (int i = 3; i < resp.Length; i += 2)
+                    yield return (resp[i] << 8) + resp[i + 1];
         }
 
         /// <summary> Прямая запись в последовательный порт. Добавляется контрольная сумма CRC16.</summary>
