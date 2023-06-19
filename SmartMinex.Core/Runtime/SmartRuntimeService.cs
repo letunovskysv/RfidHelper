@@ -67,7 +67,7 @@ namespace SmartMinex.Runtime
         {
             Status = RuntimeStatus.StartPending;
 
-            AppDomain.CurrentDomain.GetAssemblies() // Звапуск системных обязательных модулей -->
+            AppDomain.CurrentDomain.GetAssemblies() // Запуск системных обязательных модулей -->
                 .SelectMany(a => a.GetTypes())
                 .Where(t => t.GetInterfaces().Contains(typeof(IStartup))).ToList()
                 .ForEach(t => Modules.AddSingleton(t));

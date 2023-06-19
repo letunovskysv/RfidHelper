@@ -18,7 +18,13 @@
       "name": "Служба опроса",
       "type": "SmartMinex.Rfid.Modules.RfidMonitorService, SmartMinex.Core",
       "start": "auto",
-      "port": "COM1",
+      "serial": {
+        "name": "COM1",
+        "baudrate": 38400,
+        "parity": "Even",
+        "stopbits": "One",
+        "databits": 8
+      },
       "devices": [
         {
           "name": "БОМ",

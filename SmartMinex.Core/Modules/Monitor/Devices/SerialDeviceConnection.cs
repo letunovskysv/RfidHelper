@@ -22,6 +22,7 @@ namespace SmartMinex.Rfid
         public string Name { get; set; }
         public int BaudRate { get; set; }
         public int DataBits { get; set; }
+        [ConfigurationProperty]
         public StopBits StopBits { get; set; }
         public Parity Parity { get; set; }
         public int FlowControl { get; set; }

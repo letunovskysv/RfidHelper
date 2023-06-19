@@ -17,8 +17,8 @@ namespace SmartMinex.Rfid.Modules
 
         const string NULL = "<нет данных>";
 
-        /// <summary> Имя COM-порта.</summary>
-        string _port;
+        /// <summary> Настройки COM-порта.</summary>
+        SerialPortSetting _serial;
         /// <summary> Устройства (из конфигурации).</summary>
         TDevice[] _init_devices;
 
@@ -29,10 +29,10 @@ namespace SmartMinex.Rfid.Modules
 
         #endregion Declarations
 
-        public RfidMonitorService(IRuntime runtime, string port, TDevice[]? devices) : base(runtime)
+        public RfidMonitorService(IRuntime runtime, SerialPortSetting serial, TDevice[]? devices) : base(runtime)
         {
             Subscribe = new[] { MSG.ConsoleCommand };
-            _port = port;
+            _serial = serial;
             _init_devices = devices;
             _logger = new FileLogger(@"logs\rfiddevice.log");
             _logger.WriteLine("****************************************************************************************************");
@@ -41,7 +41,7 @@ namespace SmartMinex.Rfid.Modules
         protected override async Task ExecuteProcess()
         {
             Status = RuntimeStatus.Running;
-            _readers.Add(new RfidAnchorReader(_port, _logger, _init_devices));
+            _readers.Add(new RfidAnchorReader(_serial, _logger, _init_devices));
             Open();
             while (_sync.WaitOne() && (Status & RuntimeStatus.Loop) > 0)
                 try
@@ -72,7 +72,7 @@ namespace SmartMinex.Rfid.Modules
             {
                 case "FIND":
                 case "SEARCH":
-                    Search(idTerminal, args.Length > 1 ? args[1] : _port);
+                    Search(idTerminal, args.Length > 1 ? args[1] : _serial.Name);
                     break;
 
                 case "SEND":

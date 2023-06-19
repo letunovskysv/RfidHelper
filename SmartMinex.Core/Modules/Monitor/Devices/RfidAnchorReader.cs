@@ -59,11 +59,11 @@ namespace SmartMinex.Rfid
 
         #endregion Properties
 
-        public RfidAnchorReader(string portName, IxLogger logger, TDevice[] devices)
+        public RfidAnchorReader(SerialPortSetting serial, IxLogger logger, TDevice[] devices)
         {
             _connection = new SerialDeviceConnection(new SerialPortSetting()
             {
-                Name = portName,
+                Name = serial.Name,
                 BaudRate = 38400,
                 Parity = System.IO.Ports.Parity.Even,
                 StopBits = System.IO.Ports.StopBits.One,
