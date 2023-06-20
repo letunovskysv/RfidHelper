@@ -9,7 +9,6 @@ namespace SmartMinex.Web
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
-    using SmartMinex.Web.Data;
     #endregion Using
 
     internal class SmartWebServer
@@ -18,7 +17,6 @@ namespace SmartMinex.Web
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<WeatherForecastService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

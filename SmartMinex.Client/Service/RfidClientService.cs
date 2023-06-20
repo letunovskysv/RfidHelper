@@ -8,7 +8,6 @@ namespace SmartMinex.Web
     using System;
     using System.Reflection;
     using SmartMinex.Runtime;
-    using SmartMinex.Web.Data;
     #endregion Using
 
     internal class RfidClientService : TModule
