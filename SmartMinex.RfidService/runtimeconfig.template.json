@@ -15,7 +15,7 @@
   ],
   "modules": [
     {
-      "name": "Служба опроса",
+      "name": "Служба опроса RFID-устройств",
       "type": "SmartMinex.Rfid.Modules.RfidMonitorService, SmartMinex.Core",
       "start": "auto",
       "serial": {

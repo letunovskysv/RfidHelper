@@ -25,6 +25,7 @@ namespace SmartMinex.Web
         {
             Subscribe = new[] { MSG.ConsoleCommand };
             Port = port ?? 80; // default HTTP port
+            Name = "Клиентская служба доступа к данным, http://localhost:" + Port;
         }
 
         protected override async Task ExecuteProcess()
