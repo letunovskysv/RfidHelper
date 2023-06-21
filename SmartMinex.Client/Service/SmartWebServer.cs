@@ -8,7 +8,9 @@ namespace SmartMinex.Web
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.FileProviders;
     using Microsoft.Extensions.Hosting;
+    using System.Linq;
     #endregion Using
 
     internal class SmartWebServer
@@ -21,6 +23,11 @@ namespace SmartMinex.Web
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            var wwwroot = new ManifestEmbeddedFileProvider(typeof(SmartWebServer).Assembly, "wwwroot");
+            env.WebRootFileProvider = env.WebRootFileProvider is CompositeFileProvider def
+                ? new CompositeFileProvider(def.FileProviders.Concat(new[] { wwwroot }))
+                : wwwroot;
+
             // Configure the HTTP request pipeline.
             if (!env.IsDevelopment())
             {
