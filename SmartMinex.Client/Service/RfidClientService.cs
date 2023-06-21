@@ -59,10 +59,6 @@ namespace SmartMinex.Web
     static class WebExtensions
     {
         /// <summary> Использовать встроенные статические ресурсы.</summary>
-        /// <remarks> Обязательно:<br/>
-        /// Подключить NuGet пакет <strong>Microsoft.Extensions.FileProviders.Embedded</strong><br/>
-        /// Включить в настройки проекта запись <strong>&lt;GenerateEmbeddedFilesManifest&gt;true&lt;/GenerateEmbeddedFilesManifest&gt;</strong>
-        /// </remarks>
         public static void UseResourceEmbedded(this IWebHostEnvironment env, string path = "SmartMinex.Web.wwwroot")
         {
             env.WebRootFileProvider = new EmbeddedFileProvider(typeof(SmartWebServer).Assembly, path);
