@@ -8,6 +8,7 @@ namespace SmartMinex.Web
     using System;
     using System.Reflection;
     using Microsoft.Extensions.FileProviders;
+    using Microsoft.Extensions.FileProviders.Physical;
     using SmartMinex.Runtime;
     #endregion Using
 
@@ -64,10 +65,10 @@ namespace SmartMinex.Web
         /// </remarks>
         public static void UseResourceEmbedded(this IWebHostEnvironment env, string path = "wwwroot")
         {
-            var src = new ManifestEmbeddedFileProvider(Assembly.GetCallingAssembly(), path);
-            env.WebRootFileProvider = env.WebRootFileProvider is CompositeFileProvider cfp
-                ? new CompositeFileProvider(cfp.FileProviders.Concat(new[] { src }))
-                : src;
+            var t = new EmbeddedFileProvider(typeof(SmartWebServer).Assembly, "SmartMinex.Web.wwwroot");
+            env.WebRootFileProvider = false && env.WebRootFileProvider is CompositeFileProvider cfp
+                ? new CompositeFileProvider(cfp.FileProviders.Concat(new[] { t }))
+                : new CompositeFileProvider(t);
         }
     }
 }

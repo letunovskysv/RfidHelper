@@ -8,7 +8,6 @@
     <Description>Информационный сервер</Description>
     <RootNamespace>SmartMinex.Web</RootNamespace>
     <AssemblyName>SmartMinex.Web</AssemblyName>
-    <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="7.0.7" />
+    <Content Remove="wwwroot\SmartMinex.Web.styles.css" />
   </ItemGroup>
 
 </Project>
