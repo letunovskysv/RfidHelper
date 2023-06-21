@@ -7,6 +7,7 @@ namespace SmartMinex.Web
     #region Using
     using System;
     using System.Reflection;
+    using Microsoft.Extensions.FileProviders;
     using SmartMinex.Runtime;
     #endregion Using
 
@@ -51,6 +52,22 @@ namespace SmartMinex.Web
                 .RunAsync(_webhost.Token);
 
             Status = RuntimeStatus.Running;
+        }
+    }
+
+    static class WebExtensions
+    {
+        /// <summary> Использовать встроенные статические ресурсы.</summary>
+        /// <remarks> Обязательно:<br/>
+        /// Подключить NuGet пакет <strong>Microsoft.Extensions.FileProviders.Embedded</strong><br/>
+        /// Включить в настройки проекта запись <strong>&lt;GenerateEmbeddedFilesManifest&gt;true&lt;/GenerateEmbeddedFilesManifest&gt;</strong>
+        /// </remarks>
+        public static void UseResourceEmbedded(this IWebHostEnvironment env, string path = "wwwroot")
+        {
+            var src = new ManifestEmbeddedFileProvider(Assembly.GetCallingAssembly(), path);
+            env.WebRootFileProvider = env.WebRootFileProvider is CompositeFileProvider cfp
+                ? new CompositeFileProvider(cfp.FileProviders.Concat(new[] { src }))
+                : src;
         }
     }
 }

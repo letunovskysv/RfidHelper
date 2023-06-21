@@ -22,11 +22,8 @@ namespace SmartMinex.Web
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {
-            var wwwroot = new ManifestEmbeddedFileProvider(typeof(SmartWebServer).Assembly, "wwwroot");
-            env.WebRootFileProvider = env.WebRootFileProvider is CompositeFileProvider def
-                ? new CompositeFileProvider(def.FileProviders.Concat(new[] { wwwroot }))
-                : wwwroot;
+        {         
+            env.UseResourceEmbedded();
 
             // Configure the HTTP request pipeline.
             if (!env.IsDevelopment())
