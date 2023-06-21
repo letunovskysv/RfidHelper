@@ -63,12 +63,9 @@ namespace SmartMinex.Web
         /// Подключить NuGet пакет <strong>Microsoft.Extensions.FileProviders.Embedded</strong><br/>
         /// Включить в настройки проекта запись <strong>&lt;GenerateEmbeddedFilesManifest&gt;true&lt;/GenerateEmbeddedFilesManifest&gt;</strong>
         /// </remarks>
-        public static void UseResourceEmbedded(this IWebHostEnvironment env, string path = "wwwroot")
+        public static void UseResourceEmbedded(this IWebHostEnvironment env, string path = "SmartMinex.Web.wwwroot")
         {
-            var t = new EmbeddedFileProvider(typeof(SmartWebServer).Assembly, "SmartMinex.Web.wwwroot");
-            env.WebRootFileProvider = false && env.WebRootFileProvider is CompositeFileProvider cfp
-                ? new CompositeFileProvider(cfp.FileProviders.Concat(new[] { t }))
-                : new CompositeFileProvider(t);
+            env.WebRootFileProvider = new EmbeddedFileProvider(typeof(SmartWebServer).Assembly, path);
         }
     }
 }
