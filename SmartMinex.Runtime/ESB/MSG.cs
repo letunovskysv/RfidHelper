@@ -46,6 +46,14 @@ namespace SmartMinex.Runtime
         /// <remarks> LParam = ИД процесса (модуля); HParam = ИД терминальной сессии; Data = text/int - 0x484F4C44 HOLD, 0x46524545 FREE.</remarks>
         public const int TerminalLine = 0x0015;
 
+        /// <summary> [Команда] Чтение меток с устройства.</summary>
+        /// <remarks> LParam = ИД процесса (модуля); HParam = .</remarks>
+        public const int ReadTags = 0xa000;
+
+        /// <summary> [Ответ] Возвращает данные чтения меток с устройства (команда ReadTags).</summary>
+        /// <remarks> LParam = ИД процесса (модуля); HParam = -1 ошибка запроса.</remarks>
+        public const int ReadTagsData = 0xa001;
+
         /// <summary> Все сообщения.</summary>
         public const int All = 0x55555555;
     }

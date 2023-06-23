@@ -32,7 +32,7 @@ namespace SmartMinex.Rfid
 
         public RfidMonitorService(IRuntime runtime, SerialPortSetting serial, TDevice[]? devices) : base(runtime)
         {
-            Subscribe = new[] { MSG.ConsoleCommand };
+            Subscribe = new[] { MSG.ConsoleCommand, MSG.ReadTags };
             _serial = serial;
             _init_devices = devices;
             _logger = new FileLogger(@"logs\rfiddevice.log");
@@ -51,6 +51,10 @@ namespace SmartMinex.Rfid
                     {
                         switch (m.Msg)
                         {
+                            case MSG.ReadTags:
+                                OnReadTags(m.LParam);
+                                break;
+
                             case MSG.ConsoleCommand:
                                 if ((m.HParam == ProcessId || m.HParam == 0) && m.Data is string[] args && args.Length > 0)
                                     DoCommand(m.LParam, args);
@@ -205,6 +209,22 @@ namespace SmartMinex.Rfid
             var tags = _readers.FirstOrDefault()?.ReadTagsFromBuffer().Select(t => t.ToString());
             if (tags != null)
                 Runtime.Send(MSG.TerminalLine, ProcessId, idTerminal, "Найдено " + tags.Count() + " RFID-меток:\r\n  Номер Батарея   Флаги\r\n" + string.Join("\r\n", tags));
+        }
+
+        void OnReadTags(long idRequest)
+        {
+            try
+            {
+                var tags = _readers.FirstOrDefault()?.ReadTagsFromBuffer();
+                if (tags != null)
+                    Runtime.Send(MSG.ReadTagsData, idRequest, 0, tags);
+                else
+                    Runtime.Send(MSG.ReadTagsData, idRequest, -1, "Ошибка запроса меток.");
+            }
+            catch (Exception ex)
+            {
+                Runtime.Send(MSG.ReadTagsData, idRequest, -1, ex);
+            }
         }
 
         void OnHelp(long idTerminal)

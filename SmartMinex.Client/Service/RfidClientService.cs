@@ -16,7 +16,8 @@ namespace SmartMinex.Web
     {
         #region Declarations
 
-        readonly CancellationTokenSource _webhost = new CancellationTokenSource();
+        readonly CancellationTokenSource _webhost = new();
+        readonly Dispatcher _disp;
 
         public int Port { get; set; }
 
@@ -24,14 +25,15 @@ namespace SmartMinex.Web
 
         public RfidClientService(IRuntime runtime, string schema, int? port) : base(runtime)
         {
-            Subscribe = new[] { MSG.ConsoleCommand };
+            Subscribe = new[] { MSG.ConsoleCommand, MSG.ReadTagsData };
             Port = port ?? 80; // default HTTP port
             Name = "Клиентская служба доступа к данным, http://localhost:" + Port;
+            _disp = new Dispatcher(Runtime);
         }
 
         protected override async Task ExecuteProcess()
         {
-            await Host.CreateDefaultBuilder()
+            var srv = Host.CreateDefaultBuilder()
                 .UseContentRoot(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location))
                 .ConfigureWebHostDefaults(host =>
                 {
@@ -40,20 +42,41 @@ namespace SmartMinex.Web
                     {
                         opt.ListenAnyIP(Port, listen =>
                         {
-                          //  listen.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2;
+                            //  listen.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2;
                         });
                     });
                     host.ConfigureServices((srv) =>
                     {
-                        srv.AddSingleton(Runtime);
+                        srv.AddSingleton(_disp);
                         srv.AddDistributedMemoryCache();
                     });
                     host.UseStartup<SmartWebServer>();
                 })
-                .Build()
-                .RunAsync(_webhost.Token);
+                .Build();
+
+            await srv.StartAsync(_webhost.Token).ConfigureAwait(false);
 
             Status = RuntimeStatus.Running;
+            while (_sync.WaitOne() && (Status & RuntimeStatus.Loop) > 0)
+                try
+                {
+                    while (_esb.TryDequeue(out TMessage m))
+                    {
+                        switch (m.Msg)
+                        {
+                            case MSG.ReadTagsData:
+                                await _disp.OnMessageReceivedAsync(m);
+                                break;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Runtime.Send(MSG.ErrorMessage, ProcessId, 0, ex);
+                }
+
+            _webhost.Cancel();
+            await base.ExecuteProcess();
         }
     }
 

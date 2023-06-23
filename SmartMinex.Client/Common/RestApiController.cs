@@ -7,25 +7,19 @@
     [Route("api/data")]
     public class RestApiController : ControllerBase
     {
-        readonly IRuntime _rtm;
+        readonly Dispatcher _rtm;
 
-        public RestApiController(IRuntime runtime)
+        public RestApiController(Dispatcher runtime)
         {
             _rtm = runtime;
         }
 
         /// <summary> http://localhost:8000/api/data/readtags </summary>
         [HttpGet("[action]")]
-        public IEnumerable<string> ReadTags()
+        public async Task<IEnumerable<string>?> ReadTags()
         {
-            return new string[] { "value1", "value2" };
-        }
-
-        // GET api/<ValuesController>/5
-        [HttpGet("*")]
-        public string Get(string id)
-        {
-            return "value";
+            var tags = await _rtm.ReadTagsAsync();
+            return tags?.Select(t => t.ToString()).ToArray();
         }
     }
 }
