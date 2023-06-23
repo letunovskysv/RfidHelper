@@ -42,5 +42,8 @@ namespace SmartMinex.Runtime
         int Send(TMessage m, long delay);
         int Send(TMessage m, long delay, long period);
         int Send(TMessage m, DateTime dateTime);
+
+        /// <summary> Возвращает найденный сервис (модуль).</summary>
+        T? GetService<T>();
     }
 }

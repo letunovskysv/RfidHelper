@@ -8,6 +8,7 @@ namespace SmartMinex.Rfid
     using System;
     using System.IO.Ports;
     using System.Reflection;
+    using SmartMinex.Rfid.Modules;
     using SmartMinex.Runtime;
     #endregion Using
 

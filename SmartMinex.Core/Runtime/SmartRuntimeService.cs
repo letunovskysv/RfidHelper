@@ -215,7 +215,7 @@ namespace SmartMinex.Runtime
         public void Kill() => throw new NotImplementedException();
         public void ProcessMessage(ref TMessage m) => throw new NotImplementedException();
 
-        public T GetService<T>() =>
+        public T? GetService<T>() =>
             Modules.GetModule<T>();
 
         public string GetWorkDirectory()

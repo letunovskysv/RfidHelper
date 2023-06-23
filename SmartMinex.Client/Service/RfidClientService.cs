@@ -45,6 +45,7 @@ namespace SmartMinex.Web
                     });
                     host.ConfigureServices((srv) =>
                     {
+                        srv.AddSingleton(Runtime);
                         srv.AddDistributedMemoryCache();
                     });
                     host.UseStartup<SmartWebServer>();

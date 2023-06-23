@@ -16,7 +16,7 @@
   "modules": [
     {
       "name": "Служба опроса RFID-устройств",
-      "type": "SmartMinex.Rfid.Modules.RfidMonitorService, SmartMinex.Core",
+      "type": "SmartMinex.Rfid.RfidMonitorService, SmartMinex.Core",
       "start": "auto",
       "serial": {
         "name": "COM1",
