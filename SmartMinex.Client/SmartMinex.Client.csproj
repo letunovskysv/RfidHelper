@@ -19,10 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Properties\*" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Remove="wwwroot\SmartMinex.Web.styles.css" />
   </ItemGroup>
 

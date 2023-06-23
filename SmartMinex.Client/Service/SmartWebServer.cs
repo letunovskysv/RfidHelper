@@ -23,8 +23,7 @@ namespace SmartMinex.Web
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-              env.UseResourceEmbedded();
-          //  env.WebRootFileProvider = new EmbeddedFileProvider(typeof(SmartWebServer).Assembly, "SmartMinex.Web.wwwroot");
+            env.UseResourceEmbedded();
 
             // Configure the HTTP request pipeline.
             if (!env.IsDevelopment())
