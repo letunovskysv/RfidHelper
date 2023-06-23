@@ -22,4 +22,8 @@
     <Content Remove="wwwroot\SmartMinex.Web.styles.css" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Radzen.Blazor" Version="4.13.3" />
+  </ItemGroup>
+
 </Project>
