@@ -1,9 +1,16 @@
-﻿using SmartMinex.Runtime;
-using System.Collections.Concurrent;
-using System.Diagnostics;
-
+﻿//--------------------------------------------------------------------------------------------------
+// (C) 2023-2023 UralTehIS, LLC. UTIS Smart System Platform. Version 2.0. All rights reserved.
+// Описание: TDispatcher –
+//--------------------------------------------------------------------------------------------------
 namespace SmartMinex.Web
 {
+    #region Using
+    using SmartMinex.Rfid;
+    using SmartMinex.Runtime;
+    using System.Collections.Concurrent;
+    using System.Diagnostics;
+    #endregion Using
+
     public class TDispatcher
     {
         static volatile int _count;
@@ -26,6 +33,11 @@ namespace SmartMinex.Web
                 return result;
 
             return null;
+        }
+
+        public IEnumerable<IDevice>? GetDevices()
+        {
+            return _rtm.GetService<IOServer>()?.Devices;
         }
 
         public async Task OnMessageReceivedAsync(TMessage m) => await Task.Run(() =>

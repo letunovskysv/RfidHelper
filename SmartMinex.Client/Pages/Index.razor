@@ -5,7 +5,7 @@
 
 <RadzenButton Click="@(e => OnPollClick())">Опросить</RadzenButton>
 
-@if (_state > PollState.None && _data != null)
+@if (_state > PageState.None && _data != null)
 {
     <RadzenLabel>@CountMessage(_data.Count())</RadzenLabel>
     <RadzenDataGrid Data="@_data" TItem="RfidTag" AllowSorting="true" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" SelectionMode="DataGridSelectionMode.Single"
@@ -22,11 +22,12 @@
                         <RadzenDropDown Data="@_states" @bind-Value=@_stateSelected Style="width:100%" Change=@OnStateSelected />
                     </FilterTemplate>
                 </RadzenDataGridColumn>
-            </Columns>
+            <RadzenDataGridColumn TItem="RfidTag" Property="Version" Title="Версия ПО" TextAlign="TextAlign.Right" />
+        </Columns>
         </RadzenDataGrid>
 }
 @code {
-    PollState _state;
+    PageState _state;
     IEnumerable<RfidTag>? _data;
     IList<RfidTag>? _selected;
     string? _stateSelected;
@@ -35,11 +36,11 @@
 
     async Task OnPollClick()
     {
-        _state = PollState.Polling;
+        _state = PageState.Polling;
 #if DEBUG
     _data = new List<RfidTag>()
     {
-    new() { Code = 1295, Battery = 3.9f, Flags = RfidTagFlags.Charge },
+    new() { Code = 1295, Battery = 3.9f, Flags = RfidTagFlags.Charge, Version = "2.32" },
     new() { Code = 1417, Battery = 0f, Flags = RfidTagFlags.Charge },
     new() { Code = 1775, Battery = 4.1f, Flags = RfidTagFlags.None },
     new() { Code = 8655, Battery = -1f, Flags = RfidTagFlags.None },
@@ -52,7 +53,7 @@
 #else
         _data = await _rtm.ReadTagsAsync();
 #endif
-        _state = PollState.Success;
+        _state = PageState.Success;
     }
 
     void OnStateSelected(object value)
@@ -79,7 +80,7 @@
     string CountMessage(int count) =>
         " Найдено: " + count + (count.ToString()[^1].ToString() switch { "1" => " метка.", "2" => " метки.", "3" => " метки.", "4" => " метки.", _ => " меток." });
 
-    enum PollState
+    enum PageState
     {
         None,
         Polling,

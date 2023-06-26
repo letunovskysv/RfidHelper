@@ -9,6 +9,7 @@ namespace SmartMinex.Web
     using System.Reflection;
     using Microsoft.Extensions.FileProviders;
     using Microsoft.Extensions.FileProviders.Physical;
+    using SmartMinex.Rfid;
     using SmartMinex.Runtime;
     #endregion Using
 

@@ -12,6 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SmartMinex.RfidDevices\SmartMinex.RfidDevices.csproj" />
     <ProjectReference Include="..\SmartMinex.Runtime\SmartMinex.Runtime.csproj" />
   </ItemGroup>
   

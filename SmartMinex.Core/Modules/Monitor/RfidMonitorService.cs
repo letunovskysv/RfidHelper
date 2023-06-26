@@ -12,7 +12,7 @@ namespace SmartMinex.Rfid
     using SmartMinex.Runtime;
     #endregion Using
 
-    internal class RfidMonitorService : TModule
+    internal class RfidMonitorService : TModule, IOServer
     {
         #region Declarations
 
@@ -27,6 +27,7 @@ namespace SmartMinex.Rfid
 
         /// <summary> Список линий.</summary>
         readonly List<RfidAnchorReader> _readers = new();
+        public List<IDevice> Devices => _readers.SelectMany(r => r.Devices).ToList();
 
         #endregion Declarations
 

@@ -1,10 +1,26 @@
 ﻿@page "/equipments"
+@inject TDispatcher _rtm
+
+<RadzenDataGrid Data="@_data" TItem="IDevice">
+    <Columns>
+        <RadzenDataGridColumn TItem="IDevice" Property="Address" Title="Адрес"/>
+        <RadzenDataGridColumn TItem="IDevice" Property="Name" Title="Наименование" />
+        <RadzenDataGridColumn TItem="IDevice" Property="Serial" Title="Серийный N" />
+        <RadzenDataGridColumn TItem="IDevice" Property="HW" Title="Версия платы" />
+        <RadzenDataGridColumn TItem="IDevice" Property="AppVersion" Title="Версия ПО" />
+        <RadzenDataGridColumn TItem="IDevice" Property="BootVersion" Title="Загрузчик" />
+        <RadzenDataGridColumn TItem="IDevice" Property="RtlsMode" Title="Загрузчик" />
+        <RadzenDataGridColumn TItem="IDevice" Property="RtlsMode" Title="Режим" />
+        <RadzenDataGridColumn TItem="IDevice" Property="State" Title="Состояние" />
+    </Columns>
+</RadzenDataGrid>
 
 @code {
-    private int currentCount = 0;
+    IEnumerable<IDevice>? _data;
 
-    private void IncrementCount()
+    protected override void OnInitialized()
     {
-        currentCount++;
+        _data = _rtm.GetDevices();
+        StateHasChanged();
     }
 }

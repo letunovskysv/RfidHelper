@@ -1,7 +1,7 @@
 ﻿namespace SmartMinex.Web
 {
     using Microsoft.AspNetCore.Mvc;
-    using SmartMinex.Runtime;
+    using SmartMinex.Rfid;
 
     [ApiController]
     [Route("api/data")]
