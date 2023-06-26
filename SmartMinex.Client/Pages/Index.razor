@@ -3,18 +3,22 @@
 @using SmartMinex.Runtime
 @inject TDispatcher _rtm
 
-<h1>БЛОК ОПРОСА МЕТОК</h1>
-
 <RadzenButton Click="@(e => OnPollClick())">Опросить</RadzenButton>
 
 @if (_state > PollState.None && _data != null)
 {
-    <RadzenDataGrid Data="@_data" TItem="RfidTag" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false">
+    <RadzenLabel>@CountMessage(_data.Count())</RadzenLabel>
+    <RadzenDataGrid Data="@_data" TItem="RfidTag" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" SelectionMode="DataGridSelectionMode.Single">
         <Columns>
-            <RadzenDataGridColumn TItem="RfidTag" Property="Code" Title="Номер" />
-            <RadzenDataGridColumn TItem="RfidTag" Property="Battery" Title="Зарядка" />
-        </Columns>
-    </RadzenDataGrid>
+            <RadzenDataGridColumn TItem="RfidTag" Property="Code" Title="Номер" TextAlign="TextAlign.Right" />
+            <RadzenDataGridColumn TItem="RfidTag" Property="Battery" Title="Зарядка" TextAlign="TextAlign.Right">
+                <Template Context="r">
+                    <RadzenText>@(r.BatteryFault ? "Неисправна" : r.BatteryWait ? "???" : r.Battery + " В")</RadzenText>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="RfidTag" Property="State" Title="Состояние" TextAlign="TextAlign.Right" />
+            </Columns>
+        </RadzenDataGrid>
 }
 @code {
     PollState _state;
@@ -24,23 +28,26 @@
     {
         _state = PollState.Polling;
 #if DEBUG
-        _data = new List<RfidTag>()
+    _data = new List<RfidTag>()
     {
-    new() { Code = 1295 },
-    new() { Code = 1417 },
-    new() { Code = 1775 },
-    new() { Code = 8655 },
-    new() { Code = 9495 },
-    new() { Code = 10008 },
-    new() { Code = 10340 },
-    new() { Code = 10366 },
-    new() { Code = 10389 }
+    new() { Code = 1295, Battery = 3.9f, Flags = RfidTagFlags.Charge },
+    new() { Code = 1417, Battery = 0f, Flags = RfidTagFlags.Charge },
+    new() { Code = 1775, Battery = 4.1f, Flags = RfidTagFlags.None },
+    new() { Code = 8655, Battery = -1f, Flags = RfidTagFlags.None },
+    new() { Code = 9495, Battery = 0f, Flags = RfidTagFlags.Charge },
+    new() { Code = 10008, Battery = 3.6f, Flags = RfidTagFlags.Charge },
+    new() { Code = 10340, Battery = 4.2f, Flags = RfidTagFlags.None },
+    new() { Code = 10366, Battery = -1f, Flags = RfidTagFlags.Charge },
+    new() { Code = 10389, Battery = 3.9f, Flags = RfidTagFlags.None },
     };
 #else
         _data = await _rtm.ReadTagsAsync();
 #endif
         _state = PollState.Success;
     }
+
+    string CountMessage(int count) =>
+        " Найдено: " + count + (count.ToString()[^1].ToString() switch { "1" => " метка.", "2" => " метки.", "3" => " метки.", "4" => " метки.", _ => " меток." });
 
     enum PollState
     {

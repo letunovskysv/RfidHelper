@@ -21,6 +21,9 @@ namespace SmartMinex.Runtime
         /// <summary> Признак, что считыватель еще не получил информацию о напряжении.</summary>
         public readonly bool BatteryWait => Battery == 0f;
 
+        /// <summary> Признак, что считыватель еще не получил информацию о напряжении.</summary>
+        public readonly string State => (Flags & RfidTagFlags.Charge) > 0 ? "Заряжается" : string.Empty;
+
         public RfidTag(int code, int flags, float power)
         {
             Code = code;
