@@ -9,7 +9,7 @@
 {
     <RadzenLabel>@CountMessage(_data.Count())</RadzenLabel>
     <RadzenDataGrid Data="@_data" TItem="RfidTag" AllowSorting="true" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" SelectionMode="DataGridSelectionMode.Single"
-                    FilterMode="FilterMode.Simple" @bind-Value=@_selected>
+                    FilterMode="FilterMode.Simple" @bind-Value=@_selected CellRender=@OnRowRender>
         <Columns>
             <RadzenDataGridColumn TItem="RfidTag" Property="Code" Title="Номер" TextAlign="TextAlign.Right" />
             <RadzenDataGridColumn TItem="RfidTag" Property="Battery" Title="Зарядка" TextAlign="TextAlign.Right">
@@ -65,6 +65,15 @@
     {
         if (value.Equals("Всё"))
             _stateSelected = null;
+    }
+
+    void OnRowRender(DataGridCellRenderEventArgs<RfidTag> row)
+    {
+        if (row.Column.Property == "Battery")
+            if (row.Data.BatteryFault)
+                row.Attributes.Add("style", "background-color:#ffd0d0");
+            else if (row.Data.BatteryWait)
+                row.Attributes.Add("style", "background-color:#f9f4ec");
     }
 
     string CountMessage(int count) =>

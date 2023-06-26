@@ -2,7 +2,7 @@
   "profiles": {
     "SmartMinex.TagMonitor": {
       "commandName": "Project",
-      "commandLineArgs": "/client",
+      "commandLineArgs": "/client_",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       },
