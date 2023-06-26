@@ -15,10 +15,6 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\SmartMinex.RfidStorage\SmartMinex.RfidStorage.csproj" />
-  </ItemGroup>
-  
-  <ItemGroup>
     <Folder Include="Database\" />
     <Folder Include="Modules\Terminal\" />
   </ItemGroup>
@@ -26,6 +22,10 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
     <PackageReference Include="System.IO.Ports" Version="7.0.0" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\SmartMinex.Runtime\SmartMinex.Runtime.csproj" />
   </ItemGroup>
   
   <ItemGroup>
