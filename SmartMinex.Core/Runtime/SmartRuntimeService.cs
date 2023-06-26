@@ -10,6 +10,7 @@ namespace SmartMinex.Runtime
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Configuration.CommandLine;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
     using SmartMinex.Rfid.Modules;

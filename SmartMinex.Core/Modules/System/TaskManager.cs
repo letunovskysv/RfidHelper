@@ -10,6 +10,7 @@ namespace SmartMinex.Runtime
     using System.Reflection;
     using System.Text.RegularExpressions;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Configuration.CommandLine;
     #endregion Using
 
     /// <summary> [Системный модуль] Диспетчер задач. Сервис управления модулями (микросервисами).</summary>
@@ -21,6 +22,10 @@ namespace SmartMinex.Runtime
 
         readonly SmartRuntimeService _rtm;
         readonly IConfiguration _cfg;
+        bool _runBrowserClient => ((ConfigurationRoot)_cfg).Providers
+            .FirstOrDefault(p => p is CommandLineConfigurationProvider) is CommandLineConfigurationProvider cfg &&
+            cfg.GetType().GetProperty("Args", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(cfg) is string[] args &&
+            (args.Contains("/client") || args.Contains("-client") || args.Contains("--client"));
 
         #endregion Declarations
 
@@ -54,6 +59,7 @@ namespace SmartMinex.Runtime
                             {
                                 Runtime.Send(MSG.StartServer, 0);
                             }
+                            if (_runBrowserClient) await Shell.Run("http://localhost:8000");
                             break;
 
                         case MSG.Start:

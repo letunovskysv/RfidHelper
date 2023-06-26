@@ -12,6 +12,7 @@
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://Letunovsky@bitbucket.org/Letunovsky/smartminex.2.0.git</RepositoryUrl>
+    <IsPublishable>False</IsPublishable>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

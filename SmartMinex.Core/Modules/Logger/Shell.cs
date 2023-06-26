@@ -133,5 +133,15 @@ namespace SmartMinex.Runtime
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
         }
+
+        public static async Task Run(string commandLine)
+        {
+            var proc = new Process();
+            proc.StartInfo.FileName = commandLine;
+            proc.StartInfo.UseShellExecute = true;
+            proc.StartInfo.CreateNoWindow = true;
+            proc.EnableRaisingEvents = false;
+            proc.Start();
+        }
     }
 }

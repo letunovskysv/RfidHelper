@@ -1,11 +1,12 @@
-﻿{
+{
   "profiles": {
     "SmartMinex.TagMonitor": {
       "commandName": "Project",
-      "dotnetRunMessages": true,
+      "commandLineArgs": "/client",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
-      }
+      },
+      "dotnetRunMessages": true
     }
   }
 }
