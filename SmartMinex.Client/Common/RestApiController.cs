@@ -16,10 +16,10 @@
 
         /// <summary> http://localhost:8000/api/data/readtags </summary>
         [HttpGet("[action]")]
-        public async Task<IEnumerable<string>?> ReadTags()
+        public async Task<RfidTag[]?> ReadTags()
         {
             var tags = await _rtm.ReadTagsAsync();
-            return tags?.Select(t => t.ToString()).ToArray();
+            return tags?.ToArray();
         }
     }
 }

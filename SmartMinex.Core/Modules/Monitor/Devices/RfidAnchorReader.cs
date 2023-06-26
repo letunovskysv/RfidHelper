@@ -42,6 +42,9 @@ namespace SmartMinex.Rfid
         static readonly byte[] CMD_OPERTIME_STARTED = new byte[] { 0x04, 0x00, 0x0e, 0x00, 0x02 };
         static readonly byte[] CMD_OPERTIME_GENERAL = new byte[] { 0x04, 0x00, 0x10, 0x00, 0x02 };
 
+        /// <summary> Идентификатор используемого буффера (256 байт).</summary>
+        const int BufferId = 0x16;
+
         readonly object _syncRoot = new();
         readonly IxLogger _logger;
         IDeviceConnection _connection;
@@ -248,30 +251,44 @@ namespace SmartMinex.Rfid
         /// <summary> Чтение данных из очереди (SF=0x07).</summary>
         public RfidTag[] ReadTagsFromBuffer()
         {
-            List<RfidTag>? res = null;
-            int idBuffer = 0x16;
+            List<RfidTag> res = new();
             int cnt = 0;
+            byte sf = 0x07;
             foreach (var dev in Devices.Cast<RfidAnchor>())
+            {
                 do
                 {
-                    Send(new byte[] { dev.Address, 0x42, 0x07, (byte)(idBuffer >> 8), (byte)idBuffer, 0xFF }.ToArray());
+                    Send(new byte[] { dev.Address, 0x42, sf, BufferId >> 8, BufferId, 0xFF });
                     Task.Delay(50);
                     var resp = Receive();
                     if (resp != null)
                     {
-                        res = new List<RfidTag>();
                         cnt = resp.Length;
                         for (int i = 6; i < cnt;)
                             res.Add(new RfidTag(
                                 (resp[i++] << 8) + resp[i++], // TagID (2 байта, big endian)
                                 resp[i++],
-                                resp[i++] == 0xff ? float.NaN : resp[i - 1] / 10f
+                                resp[i++] == 0xff ? -1f : resp[i - 1] / 10f
                             ));
                     }
+                    sf = 0x08;
                 }
                 while (cnt > 253);
 
-            return res?.ToArray() ?? Array.Empty<RfidTag>();
+                if (!AcceptTagsReaded(dev.Address))
+                    throw new Exception("Ошибка подтверждения чтения меток (SF=0x06).");
+            }
+            return res.ToArray();
+        }
+
+        /// <summary> Подтверждение прочтения (SF=0x06).</summary>
+        public bool AcceptTagsReaded(int address)
+        {
+            var data = new byte[] { (byte)address, 0x42, 0x06, BufferId >> 8, BufferId };
+            Send(data);
+            Task.Delay(50);
+            var resp = Receive();
+            return resp?.SequenceEqual(data) ?? false;
         }
 
         /// <summary> Добавление контрольной суммы ModbusRTU к массиву данных.</summary>

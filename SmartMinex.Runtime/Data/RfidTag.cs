@@ -8,25 +8,25 @@ namespace SmartMinex.Runtime
     public struct RfidTag
     {
         /// <summary> Идентификатор метки.</summary>
-        public int TagId;
+        public int Code { get; set; }
         /// <summary> Флаги телеметрии метки.</summary>
-        public RfidTagFlags Flags;
+        public RfidTagFlags Flags { get; set; }
         /// <summary> Напряжение батареи метки.</summary>
         /// <remarks> 0x00, то это означает, что считыватель еще не получил информацию о напряжении;<br/>0xFF, то это означает, что батарея неисправна(вздулась).</remarks>
-        public float Battery;
+        public float Battery { get; set; }
 
         /// <summary> Признак неисправности аккумулятора (вздулась).</summary>
-        public bool BatteryFault => float.IsNaN(Battery);
+        public readonly bool BatteryFault => Battery == -1f;
 
-        public RfidTag(int tagid, int flags, float power)
+        public RfidTag(int code, int flags, float power)
         {
-            TagId = tagid;
+            Code = code;
             Flags = (RfidTagFlags)flags;
             Battery = power;
         }
 
         public override string ToString() =>
-            $"{TagId,7},{(BatteryFault ? "неиспр." : Battery + " В"),7},{Convert.ToString((int)Flags, 2).PadLeft(8, '0'),9} {(RfidTagFlags)((int)Flags & 0x80)}";
+            $"{Code,7},{(BatteryFault ? "неиспр." : Battery + " В"),7},{Convert.ToString((int)Flags, 2).PadLeft(8, '0'),9} {(RfidTagFlags)((int)Flags & 0x80)}";
     }
 
     /// <summary> Флаги телеметрии метки.</summary>
