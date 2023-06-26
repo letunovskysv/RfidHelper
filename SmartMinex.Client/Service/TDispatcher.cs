@@ -4,18 +4,18 @@ using System.Diagnostics;
 
 namespace SmartMinex.Web
 {
-    public class Dispatcher
+    public class TDispatcher
     {
         static volatile int _count;
         readonly IRuntime _rtm;
         readonly ConcurrentDictionary<long, Envelope> _queue = new();
 
-        public Dispatcher(IRuntime runtime)
+        public TDispatcher(IRuntime runtime)
         {
             _rtm = runtime;
         }
 
-        public async Task<RfidTag[]> ReadTagsAsync()
+        public async Task<RfidTag[]?> ReadTagsAsync()
         {
             var seqid = _count++;
             _rtm.Send(MSG.ReadTags, seqid);

@@ -17,7 +17,7 @@ namespace SmartMinex.Web
         #region Declarations
 
         readonly CancellationTokenSource _webhost = new();
-        readonly Dispatcher _disp;
+        readonly TDispatcher _disp;
 
         public int Port { get; set; }
 
@@ -28,7 +28,7 @@ namespace SmartMinex.Web
             Subscribe = new[] { MSG.ConsoleCommand, MSG.ReadTagsData };
             Port = port ?? 80; // default HTTP port
             Name = "Клиентская служба доступа к данным, http://[::]:" + Port;
-            _disp = new Dispatcher(Runtime);
+            _disp = new TDispatcher(Runtime);
         }
 
         protected override async Task ExecuteProcess()
@@ -85,7 +85,10 @@ namespace SmartMinex.Web
         /// <summary> Использовать встроенные статические ресурсы.</summary>
         public static void UseResourceEmbedded(this IWebHostEnvironment env, string path = "SmartMinex.Web.wwwroot")
         {
-            env.WebRootFileProvider = new EmbeddedFileProvider(typeof(SmartWebServer).Assembly, path);
+            var efp = new EmbeddedFileProvider(typeof(SmartWebServer).Assembly, path);
+            env.WebRootFileProvider = env.WebRootFileProvider is CompositeFileProvider cfp
+                ? new CompositeFileProvider(cfp.FileProviders.Concat(new[] { efp }))
+                : efp;
         }
     }
 }

@@ -1,5 +1,51 @@
 ﻿@page "/"
+@using System.Linq
+@using SmartMinex.Runtime
+@inject TDispatcher _rtm
 
 <h1>БЛОК ОПРОСА МЕТОК</h1>
 
-<RadzenButton>Опросить</RadzenButton>
+<RadzenButton Click="@(e => OnPollClick())">Опросить</RadzenButton>
+
+@if (_state > PollState.None && _data != null)
+{
+    <RadzenDataGrid Data="@_data" TItem="RfidTag" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false">
+        <Columns>
+            <RadzenDataGridColumn TItem="RfidTag" Property="Code" Title="Номер" />
+            <RadzenDataGridColumn TItem="RfidTag" Property="Battery" Title="Зарядка" />
+        </Columns>
+    </RadzenDataGrid>
+}
+@code {
+    PollState _state;
+    IEnumerable<RfidTag>? _data;
+
+    async Task OnPollClick()
+    {
+        _state = PollState.Polling;
+#if DEBUG
+        _data = new List<RfidTag>()
+    {
+    new() { Code = 1295 },
+    new() { Code = 1417 },
+    new() { Code = 1775 },
+    new() { Code = 8655 },
+    new() { Code = 9495 },
+    new() { Code = 10008 },
+    new() { Code = 10340 },
+    new() { Code = 10366 },
+    new() { Code = 10389 }
+    };
+#else
+        _data = await _rtm.ReadTagsAsync();
+#endif
+        _state = PollState.Success;
+    }
+
+    enum PollState
+    {
+        None,
+        Polling,
+        Success
+    }
+}

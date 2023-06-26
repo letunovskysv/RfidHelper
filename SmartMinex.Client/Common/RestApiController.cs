@@ -7,9 +7,9 @@
     [Route("api/data")]
     public class RestApiController : ControllerBase
     {
-        readonly Dispatcher _rtm;
+        readonly TDispatcher _rtm;
 
-        public RestApiController(Dispatcher runtime)
+        public RestApiController(TDispatcher runtime)
         {
             _rtm = runtime;
         }
