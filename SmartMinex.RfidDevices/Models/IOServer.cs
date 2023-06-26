@@ -2,7 +2,7 @@
 // (C) 2023-2023 UralTehIS, LLC. UTIS Smart System Platform. Version 2.0. All rights reserved.
 // Описание: IOServer – Интерфейс сервера ввода/вывода.
 //--------------------------------------------------------------------------------------------------
-namespace SmartMinex.Runtime
+namespace SmartMinex.Rfid
 {
     #region Using
     using SmartMinex.Data;

@@ -6,12 +6,9 @@ namespace SmartMinex.Rfid
 {
     #region Using
     using SmartMinex.Data;
-    using SmartMinex.Rfid.Modules;
     using SmartMinex.Runtime;
     using System;
     using System.Text;
-    using System.Xml.Linq;
-    using static System.Runtime.InteropServices.JavaScript.JSType;
     #endregion Using
 
     public class RfidAnchorReader

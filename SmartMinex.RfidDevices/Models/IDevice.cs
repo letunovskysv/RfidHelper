@@ -2,7 +2,7 @@
 // (C) 2023-2023 UralTehIS, LLC. UTIS Smart System Platform. Version 2.0. All rights reserved.
 // Описание: TagBase – Базовый тэг данных.
 //--------------------------------------------------------------------------------------------------
-namespace SmartMinex.Data
+namespace SmartMinex.Rfid
 {
     #region Using
     using System;

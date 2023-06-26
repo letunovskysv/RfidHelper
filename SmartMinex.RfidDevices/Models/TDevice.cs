@@ -2,7 +2,7 @@
 // (C) 2023-2023 UralTehIS, LLC. UTIS Smart System Platform. Version 2.0. All rights reserved.
 // Описание: TDevice – Класс конфигурации устройства.
 //--------------------------------------------------------------------------------------------------
-namespace SmartMinex.Rfid.Modules
+namespace SmartMinex.Rfid
 {
     #region Using
     using System;
