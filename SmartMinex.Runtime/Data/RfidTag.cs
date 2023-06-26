@@ -18,6 +18,9 @@ namespace SmartMinex.Runtime
         /// <summary> Признак неисправности аккумулятора (вздулась).</summary>
         public readonly bool BatteryFault => Battery == -1f;
 
+        /// <summary> Признак, что считыватель еще не получил информацию о напряжении.</summary>
+        public readonly bool BatteryWait => Battery == 0f;
+
         public RfidTag(int code, int flags, float power)
         {
             Code = code;
@@ -26,7 +29,7 @@ namespace SmartMinex.Runtime
         }
 
         public override string ToString() =>
-            $"{Code,7},{(BatteryFault ? "неиспр." : Battery + " В"),7},{Convert.ToString((int)Flags, 2).PadLeft(8, '0'),9} {(RfidTagFlags)((int)Flags & 0x80)}";
+            $"{Code,7},{(BatteryFault ? "неиспр." : (BatteryWait ? "???" : Battery.ToString("0.0")) + " В"),7},{Convert.ToString((int)Flags, 2).PadLeft(8, '0'),9} {(RfidTagFlags)((int)Flags & 0x80)}";
     }
 
     /// <summary> Флаги телеметрии метки.</summary>

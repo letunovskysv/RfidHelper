@@ -60,6 +60,9 @@ namespace SmartMinex.Rfid
 
         public Exception LastError { get; private set; }
 
+        /// <summary> Список прочитанных меток.</summary>
+        public RfidTag[] Tags { get; private set; } = Array.Empty<RfidTag>();
+
         #endregion Properties
 
         public RfidAnchorReader(SerialPortSetting serialSetting, IxLogger logger, TDevice[] devices)
@@ -278,7 +281,7 @@ namespace SmartMinex.Rfid
                 if (!AcceptTagsReaded(dev.Address))
                     throw new Exception("Ошибка подтверждения чтения меток (SF=0x06).");
             }
-            return res.ToArray();
+            return Tags = res.OrderBy(t => t.Code).ToArray();
         }
 
         /// <summary> Подтверждение прочтения (SF=0x06).</summary>

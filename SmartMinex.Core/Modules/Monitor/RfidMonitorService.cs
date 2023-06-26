@@ -52,7 +52,7 @@ namespace SmartMinex.Rfid
                         switch (m.Msg)
                         {
                             case MSG.ReadTags:
-                                OnReadTags(m.LParam);
+                                OnPollTags(m.LParam);
                                 break;
 
                             case MSG.ConsoleCommand:
@@ -100,9 +100,13 @@ namespace SmartMinex.Rfid
                         Runtime.Send(MSG.TerminalLine, ProcessId, idTerminal, string.Join("\r\n", _readers.First().Devices.Select(d => d.Name)));
                     break;
 
-                case "TAGS":
+                case "POLL":
                     if (args.Length > 1 && int.TryParse(args[1], out int addr2))
-                        ReadTags(idTerminal, addr2);
+                        PollTags(idTerminal, addr2);
+                    break;
+
+                case "TAGS":
+                    ShowTags(idTerminal);
                     break;
 
                 case "?":
@@ -204,14 +208,24 @@ namespace SmartMinex.Rfid
                 }
         }
 
-        void ReadTags(long idTerminal, int address)
+        void PollTags(long idTerminal, int address)
         {
             var tags = _readers.FirstOrDefault()?.ReadTagsFromBuffer().Select(t => t.ToString());
             if (tags != null)
-                Runtime.Send(MSG.TerminalLine, ProcessId, idTerminal, "Найдено " + tags.Count() + " RFID-меток:\r\n  Номер Батарея   Флаги\r\n" + string.Join("\r\n", tags));
+                Runtime.Send(MSG.TerminalLine, ProcessId, idTerminal,
+                    "Найдено " + tags.Count() + " RFID-меток:\r\n  Номер Батарея   Флаги\r\n" +
+                    string.Join("\r\n", tags) +
+                    "\r\n, найдено " + tags.Count() + " RFID-меток.\r\n");
         }
 
-        void OnReadTags(long idRequest)
+        void ShowTags(long idTerminal)
+        {
+            var tags = _readers.FirstOrDefault()?.Tags.Select(t => t.ToString());
+            if (tags != null)
+                Runtime.Send(MSG.TerminalLine, ProcessId, idTerminal, "Последние " + tags.Count() + " RFID-меток:\r\n  Номер Батарея   Флаги\r\n" + string.Join("\r\n", tags));
+        }
+
+        void OnPollTags(long idRequest)
         {
             try
             {
