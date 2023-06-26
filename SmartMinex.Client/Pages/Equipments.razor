@@ -1,4 +1,5 @@
 ﻿@page "/equipments"
+@using SmartMinex.Runtime
 @inject TDispatcher _rtm
 
 <RadzenDataGrid Data="@_data" TItem="IDevice">
@@ -9,9 +10,12 @@
         <RadzenDataGridColumn TItem="IDevice" Property="HW" Title="Версия платы" />
         <RadzenDataGridColumn TItem="IDevice" Property="AppVersion" Title="Версия ПО" />
         <RadzenDataGridColumn TItem="IDevice" Property="BootVersion" Title="Загрузчик" />
-        <RadzenDataGridColumn TItem="IDevice" Property="RtlsMode" Title="Загрузчик" />
-        <RadzenDataGridColumn TItem="IDevice" Property="RtlsMode" Title="Режим" />
-        <RadzenDataGridColumn TItem="IDevice" Property="State" Title="Состояние" />
+        <RadzenDataGridColumn TItem="IDevice" Property="RtlsMode" Title="Режим RTLS" />
+        <RadzenDataGridColumn TItem="IDevice" Property="State" Title="Состояние">
+            <Template Context="r">
+                <RadzenText>@r.State.ToDescription()</RadzenText>
+            </Template>
+        </RadzenDataGridColumn>
     </Columns>
 </RadzenDataGrid>
 
