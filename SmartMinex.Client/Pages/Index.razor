@@ -8,7 +8,8 @@
 @if (_state > PollState.None && _data != null)
 {
     <RadzenLabel>@CountMessage(_data.Count())</RadzenLabel>
-    <RadzenDataGrid Data="@_data" TItem="RfidTag" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" SelectionMode="DataGridSelectionMode.Single">
+    <RadzenDataGrid Data="@_data" TItem="RfidTag" AllowSorting="true" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" SelectionMode="DataGridSelectionMode.Single"
+                    FilterMode="FilterMode.Simple" @bind-Value=@_selected>
         <Columns>
             <RadzenDataGridColumn TItem="RfidTag" Property="Code" Title="Номер" TextAlign="TextAlign.Right" />
             <RadzenDataGridColumn TItem="RfidTag" Property="Battery" Title="Зарядка" TextAlign="TextAlign.Right">
@@ -16,13 +17,21 @@
                     <RadzenText>@(r.BatteryFault ? "Неисправна" : r.BatteryWait ? "???" : r.Battery + " В")</RadzenText>
                     </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn TItem="RfidTag" Property="State" Title="Состояние" TextAlign="TextAlign.Right" />
+                <RadzenDataGridColumn TItem="RfidTag" Property="State" Title="Состояние" TextAlign="TextAlign.Right" FilterValue="@_stateSelected">
+                    <FilterTemplate>
+                        <RadzenDropDown Data="@_states" @bind-Value=@_stateSelected Style="width:100%" Change=@OnStateSelected />
+                    </FilterTemplate>
+                </RadzenDataGridColumn>
             </Columns>
         </RadzenDataGrid>
 }
 @code {
     PollState _state;
     IEnumerable<RfidTag>? _data;
+    IList<RfidTag>? _selected;
+    string? _stateSelected;
+    readonly IEnumerable<string> _states = new[] { "Заряжается", "Ожидание", "Всё" };
+    readonly IEnumerable<string> _battery = new[] { "Неисправна", "Ожидается", "Значение", "Всё" };
 
     async Task OnPollClick()
     {
@@ -44,6 +53,18 @@
         _data = await _rtm.ReadTagsAsync();
 #endif
         _state = PollState.Success;
+    }
+
+    void OnStateSelected(object value)
+    {
+        if (value.Equals("Всё"))
+            _stateSelected = null;
+    }
+
+    void OnBatterySelected(object value)
+    {
+        if (value.Equals("Всё"))
+            _stateSelected = null;
     }
 
     string CountMessage(int count) =>
