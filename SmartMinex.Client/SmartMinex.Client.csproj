@@ -14,6 +14,10 @@
   <ItemGroup>
     <ProjectReference Include="..\SmartMinex.Runtime\SmartMinex.Runtime.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Content Remove="wwwroot\_content\Radzen.Blazor\**\*" />
+  </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="wwwroot\**\*" />
