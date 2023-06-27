@@ -3,25 +3,41 @@
 @using SmartMinex.Runtime
 @inject TDispatcher _rtm
 
-<RadzenButton Click="@(e => OnPollClick())">Опросить</RadzenButton>
+<RadzenStack Orientation="Orientation.Horizontal">
+    <RadzenStack Orientation="Orientation.Vertical" Gap="4px">
+        <RadzenButton Style="width:200px;" Click="@(e => OnPollClick())">Опросить</RadzenButton>
+        <RadzenLabel>@CountMessage(_data?.Count() ?? 0)</RadzenLabel>
+    </RadzenStack>
+    <RadzenStack Orientation="Orientation.Vertical" Gap="4px">
+        Период опроса:
+        <RadzenDropDown Data=@_var_poll @bind-Value=@_poll ValueProperty="Key" TextProperty="Value" Style="width:250px;" />
+    </RadzenStack>
+    <RadzenStack Orientation="Orientation.Vertical" Gap="4px">
+        Режим отображения:
+        <RadzenDropDown Data=@_var_mode @bind-Value=@_mode ValueProperty="Key" TextProperty="Value" Style="width:250px;" />
+    </RadzenStack>
+</RadzenStack>
 
 @if (_state > PageState.None && _data != null)
 {
-    <RadzenLabel>@CountMessage(_data.Count())</RadzenLabel>
     <RadzenDataGrid Data="@_data" TItem="RfidTag" AllowSorting="true" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" SelectionMode="DataGridSelectionMode.Single"
-                    FilterMode="FilterMode.Simple" @bind-Value=@_selected CellRender=@OnRowRender>
+                    FilterMode="FilterMode.Simple" @bind-Value=@_selected CellRender=@OnRowRender
+                    EmptyText="Нет доступных радиочастотных меток!">
         <Columns>
             <RadzenDataGridColumn TItem="RfidTag" Property="Code" Title="Номер" TextAlign="TextAlign.Right" />
-            <RadzenDataGridColumn TItem="RfidTag" Property="Battery" Title="Зарядка" TextAlign="TextAlign.Right">
+            <RadzenDataGridColumn TItem="RfidTag" Property="Battery" Title="Зарядка" TextAlign="TextAlign.Right" FilterValue="@_batteryfilter">
                 <Template Context="r">
                     <RadzenText>@(r.BatteryFault ? "Неисправна" : r.BatteryWait ? "???" : r.Battery + " В")</RadzenText>
-                    </Template>
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn TItem="RfidTag" Property="State" Title="Состояние" TextAlign="TextAlign.Right" FilterValue="@_stateSelected">
-                    <FilterTemplate>
-                        <RadzenDropDown Data="@_states" @bind-Value=@_stateSelected Style="width:100%" Change=@OnStateSelected />
-                    </FilterTemplate>
-                </RadzenDataGridColumn>
+                </Template>
+                <FilterTemplate>
+                    <RadzenDropDown Data="@_battery" @bind-Value=@_batteryfilter Style="width:100%" Change=@OnBatteryFilter ValueProperty="Key" TextProperty="Value" />
+                </FilterTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="RfidTag" Property="State" Title="Состояние" TextAlign="TextAlign.Right" FilterValue="@_statefilter">
+                <FilterTemplate>
+                    <RadzenDropDown Data="@_states" @bind-Value=@_statefilter Style="width:100%" Change=@OnStateFilter />
+                </FilterTemplate>
+            </RadzenDataGridColumn>
             <RadzenDataGridColumn TItem="RfidTag" Property="Version" Title="Версия ПО" TextAlign="TextAlign.Right" />
         </Columns>
         </RadzenDataGrid>
@@ -30,9 +46,14 @@
     PageState _state;
     IEnumerable<RfidTag>? _data;
     IList<RfidTag>? _selected;
-    string? _stateSelected;
+    string? _statefilter;
+    float? _batteryfilter;
+    int _poll;
+    int _mode;
+    readonly Dictionary<int, string> _var_poll = new() { { 0, "Вручную" }, { 10, "10 сек" }, { 30, "30 сек" }, { 60, "1 мин" }, { 180, "3 мин" }, { 300, "5 мин" }, { 600, "10 мин" }, { 1800, "30 мин" } };
+    readonly Dictionary<int, string> _var_mode = new() { { 0, "Обновление" }, { 1, "Накопительный" } };
     readonly IEnumerable<string> _states = new[] { "Заряжается", "Ожидание", "Всё" };
-    readonly IEnumerable<string> _battery = new[] { "Неисправна", "Ожидается", "Значение", "Всё" };
+    readonly Dictionary<float, string> _battery = new() { { -1f, "Неисправна" }, { 0f, "Ожидается" }, { 256, "Всё" } };
 
     async Task OnPollClick()
     {
@@ -56,18 +77,6 @@
         _state = PageState.Success;
     }
 
-    void OnStateSelected(object value)
-    {
-        if (value.Equals("Всё"))
-            _stateSelected = null;
-    }
-
-    void OnBatterySelected(object value)
-    {
-        if (value.Equals("Всё"))
-            _stateSelected = null;
-    }
-
     void OnRowRender(DataGridCellRenderEventArgs<RfidTag> row)
     {
         if (row.Column.Property == "Battery")
@@ -75,6 +84,18 @@
                 row.Attributes.Add("style", "background-color:#ffd0d0");
             else if (row.Data.BatteryWait)
                 row.Attributes.Add("style", "background-color:#f9f4ec");
+    }
+
+    void OnBatteryFilter(object value)
+    {
+        if (value.Equals(256f))
+            _batteryfilter = null;
+    }
+
+    void OnStateFilter(object value)
+    {
+        if (value.Equals("Всё"))
+            _statefilter = null;
     }
 
     string CountMessage(int count) =>
