@@ -29,6 +29,21 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Print\fonts\tahoma.ttf" />
+    <None Remove="Print\fonts\tahomabd.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Print\fonts\tahoma.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Print\fonts\tahomabd.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="iTextSharp.LGPLv2.Core" Version="3.4.3" />
     <PackageReference Include="Radzen.Blazor" Version="4.13.3" />
   </ItemGroup>
 

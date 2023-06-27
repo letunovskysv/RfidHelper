@@ -1,7 +1,9 @@
 ﻿@page "/"
 @using System.Linq
 @using SmartMinex.Runtime
+@using System.Data;
 @inject TDispatcher _rtm
+@inject IJSRuntime _jsr
 
 <RadzenStack Orientation="Orientation.Horizontal">
     <RadzenStack Orientation="Orientation.Vertical" Gap="4px">
@@ -16,6 +18,7 @@
         Режим отображения:
         <RadzenDropDown Data=@_var_mode @bind-Value=@_mode ValueProperty="Key" TextProperty="Value" Style="width:250px;" />
     </RadzenStack>
+    <RadzenButton Style="height:36px;" Disabled=@(_state == PageState.None || _data == null) Click="@(e => ExportToPdf())">Экспорт в PDF</RadzenButton>
 </RadzenStack>
 
 @if (_state > PageState.None && _data != null)
@@ -100,6 +103,34 @@
 
     string CountMessage(int count) =>
         " Найдено: " + count + (count.ToString()[^1].ToString() switch { "1" => " метка.", "2" => " метки.", "3" => " метки.", "4" => " метки.", _ => " меток." });
+
+    async Task ExportToPdf()
+    {
+        var doc = new DocumentPdf("Список RFID-меток.pdf");
+        doc.Open();
+        doc.InsertText("Список радиочастотных меток [" + _data.Count() + "]:");
+        var dt = new DataTable();
+        dt.Columns.AddRange(new[] {
+            new DataColumn("Номер", typeof(string)),
+            new DataColumn("Зарядка", typeof(string)),
+            new DataColumn("Состояние", typeof(string)),
+            new DataColumn("Версия ПО", typeof(string))
+        });
+        _data.ToList().ForEach(r => dt.Rows.Add(
+            r.Code,
+            r.BatteryFault ? "Неисправна" : r.BatteryWait ? "???" : r.Battery + " В",
+            r.State,
+            r.Version)
+        );
+        doc.InsertTable(dt);
+        await DownloadAsync(doc.Filename, doc.ToArray());
+    }
+
+    async Task DownloadAsync(string filename, byte[] data) =>
+         await _jsr.InvokeAsync<object>(
+             "saveAsFile",
+             filename,
+             Convert.ToBase64String(data));
 
     enum PageState
     {
