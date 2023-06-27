@@ -166,13 +166,24 @@
 
         foreach (var col in _grid.ColumnsCollection)
             dt.Columns.Add(col.Title, typeof(string));
-       
-        _data.ToList().ForEach(r => dt.Rows.Add(
-            r.Code,
-            r.BatteryFault ? "Неисправна" : r.BatteryWait ? "???" : r.Battery + " В",
-            r.State,
-            r.Version)
-        );
+
+        if (_viewmode == 0)
+            _data.ToList().ForEach(r => dt.Rows.Add(
+                r.Code,
+                r.BatteryFault ? "Неисправна" : r.BatteryWait ? "???" : r.Battery + " В",
+                r.State,
+                r.Version)
+            );
+        else if (_viewmode == 1)
+            _data.ToList().ForEach(r => dt.Rows.Add(
+                r.Code,
+                r.BatteryFault ? "Неисправна" : r.BatteryWait ? "???" : r.Battery + " В",
+                r.State,
+                r.Version,
+                r.Modified,
+                r.Status.ToDescription())
+            );
+
         doc.InsertTable(dt);
         await DownloadAsync(doc.Filename, doc.ToArray());
     }
