@@ -44,8 +44,8 @@
             <RadzenDataGridColumn TItem="RfidTag" Property="Version" Title="Версия ПО" TextAlign="TextAlign.Right" />
             @if (_viewmode == 1)
             {
-                <RadzenDataGridColumn TItem="RfidTag" Property="Modified" Title="Изменена" TextAlign="TextAlign.Right" />
-                <RadzenDataGridColumn TItem="RfidTag" Property="Status" Title="Статус" TextAlign="TextAlign.Right">
+                <RadzenDataGridColumn TItem="RfidTag" Property="Modified" Title="Изменена" TextAlign="TextAlign.Right" Filterable="false" />
+                <RadzenDataGridColumn TItem="RfidTag" Property="Status" Title="Статус" TextAlign="TextAlign.Right" Filterable="false">
                     <Template Context="r">
                         <RadzenText>@r.Status.ToDescription()</RadzenText>
                     </Template>
