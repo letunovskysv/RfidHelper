@@ -20,7 +20,7 @@
     </RadzenStack>
     <RadzenStack Orientation="Orientation.Vertical" Gap="4px">
         Режим отображения:
-        <RadzenDropDown Data=@_var_viewmode @bind-Value=@_viewmode ValueProperty="Key" TextProperty="Value" Style="width:250px;" />
+        <RadzenDropDown Data=@_var_viewmode @bind-Value=@_session.ViewMode ValueProperty="Key" TextProperty="Value" Style="width:250px;" />
     </RadzenStack>
     <RadzenButton Style="height:36px;" Disabled=@(_state == PageState.None || _data == null) Click="@(e => ExportToPdf())">Экспорт в PDF</RadzenButton>
 </RadzenStack>
@@ -46,7 +46,7 @@
                 </FilterTemplate>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn TItem="RfidTag" Property="Version" Title="Версия ПО" TextAlign="TextAlign.Right" />
-            @if (_viewmode == 1)
+            @if (_session.ViewMode == 1)
             {
                 <RadzenDataGridColumn TItem="RfidTag" Property="Modified" Title="Изменена" TextAlign="TextAlign.Right" Filterable="false" />
                 <RadzenDataGridColumn TItem="RfidTag" Property="Status" Title="Статус" TextAlign="TextAlign.Right" Filterable="false">
@@ -64,10 +64,10 @@
     PageState _state;
     IEnumerable<RfidTag>? _data;
     IList<RfidTag>? _selected;
+    TSession _session;
     string? _statefilter;
     float? _batteryfilter;
     int _poll;
-    int _viewmode;
     System.Timers.Timer? _timer;
     readonly Dictionary<int, string> _var_poll = new() { { 0, "Вручную" }, { 5, "5 сек" }, { 10, "10 сек" }, { 30, "30 сек" }, { 60, "1 мин" }, { 180, "3 мин" }, { 300, "5 мин" }, { 600, "10 мин" }, { 1800, "30 мин" } };
     readonly Dictionary<int, string> _var_viewmode = new() { { 0, "Обновление" }, { 1, "Накопительный" } };
@@ -76,16 +76,11 @@
 
     protected override void OnInitialized()
     {
+        _session = _rtm.Sessions.Get(_accessor.HttpContext.Session.Id);
         _poll = _rtm.Interval;
-        _viewmode = _rtm.ViewMode;
-        var tagsdata = _accessor.HttpContext.Session.GetString("tagsdata");
-        if (tagsdata != null)
-            try
-            {
-                _data = JsonSerializer.Deserialize<IEnumerable<RfidTag>>(tagsdata);
-                _state = PageState.Success;
-            }
-            catch { }
+        _session.ViewMode = _session.ViewMode ?? _rtm.ViewMode;
+        _data = _session.TagsData;
+        _state = _data == null ? PageState.None : PageState.Success;
     }
 
     async Task OnPollClick()
@@ -112,10 +107,8 @@
 #else
         var newtags = await _rtm.ReadTagsAsync();
 #endif
-        _data = _viewmode == 0 ? newtags : DataMerge(_data, newtags);
+        _session.TagsData = _data = _session.ViewMode == 0 ? newtags : DataMerge(_data, newtags);
         _state = PageState.Success;
-        //if (_data != null)
-        //    _accessor.HttpContext.Session.SetString("tagsdata", JsonSerializer.Serialize(_data));
     }
 
     void OnRowRender(DataGridCellRenderEventArgs<RfidTag> row)
@@ -182,14 +175,14 @@
         foreach (var col in _grid.ColumnsCollection)
             dt.Columns.Add(col.Title, typeof(string));
 
-        if (_viewmode == 0)
+        if (_session.ViewMode == 0)
             _data.ToList().ForEach(r => dt.Rows.Add(
                 r.Code,
                 r.BatteryView,
                 r.State,
                 r.Version)
             );
-        else if (_viewmode == 1)
+        else if (_session.ViewMode == 1)
             _data.ToList().ForEach(r => dt.Rows.Add(
                 r.Code,
                 r.BatteryView,

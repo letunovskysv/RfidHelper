@@ -15,7 +15,8 @@ namespace SmartMinex.Web
     {
         static volatile int _count;
         readonly IRuntime _rtm;
-        readonly ConcurrentDictionary<long, Envelope> _queue = new();
+        readonly ConcurrentDictionary<long, TEnvelope> _queue = new();
+        internal readonly TSessionStorage Sessions = new();
 
         /// <summary> Период опроса меток.</summary>
         public int Interval { get; set; }
@@ -33,7 +34,7 @@ namespace SmartMinex.Web
         {
             var seqid = _count++;
             _rtm.Send(MSG.ReadTags, seqid);
-            var tkn = new Envelope(3000);
+            var tkn = new TEnvelope(3000);
             _queue.TryAdd(seqid, tkn);
             while (tkn.Next) await Task.Delay(50);
             if (tkn.Data is RfidTag[] result)
@@ -54,7 +55,7 @@ namespace SmartMinex.Web
         });
     }
 
-    class Envelope
+    class TEnvelope
     {
         readonly CancellationTokenSource _token;
         readonly Stopwatch _timer;
@@ -63,7 +64,7 @@ namespace SmartMinex.Web
 
         public bool Next => !_token.IsCancellationRequested && _timer.ElapsedMilliseconds <= _delay;
 
-        public Envelope(int delay)
+        public TEnvelope(int delay)
         {
             _delay = delay;
             _token = new CancellationTokenSource();
@@ -75,6 +76,35 @@ namespace SmartMinex.Web
             Data = data;
             _timer.Stop();
             _token.Cancel();
+        }
+    }
+
+    internal class TSession
+    {
+        public string Id { get; }
+        public DateTime Modified { get; set; } = DateTime.Now;
+
+        public IEnumerable<RfidTag>? TagsData;
+        public int? ViewMode { get; set; }
+
+        public TSession(string id)
+        {
+            Id = id;
+        }
+    }
+
+    internal class TSessionStorage : ConcurrentDictionary<string, TSession>
+    {
+        public TSession Get(string key)
+        {
+            if (!TryGetValue(key, out var session))
+                TryAdd(key, session = new TSession(key));
+
+            session.Modified = DateTime.Now;
+            this.Values.Where(s => (session.Modified - s.Modified).TotalMinutes > 60).ToList()
+                .ForEach(s => this.TryRemove(s.Id, out _));
+
+            return session;
         }
     }
 }
