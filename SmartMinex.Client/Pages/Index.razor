@@ -62,21 +62,27 @@
     {
         _state = PageState.Polling;
 #if DEBUG
-    _data = new List<RfidTag>()
+    int n;
+    var rand = new Random();
+    var newtags = new List<RfidTag>()
     {
-    new() { Code = 1295, Battery = 3.9f, Flags = RfidTagFlags.Charge, Version = "2.32" },
-    new() { Code = 1417, Battery = 0f, Flags = RfidTagFlags.Charge },
-    new() { Code = 1775, Battery = 4.1f, Flags = RfidTagFlags.None },
+    new() { Code = 1295, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.Charge, Version = "2.32" },
+    new() { Code = 1417, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.Charge },
+    new() { Code = 1775, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None },
     new() { Code = 8655, Battery = -1f, Flags = RfidTagFlags.None },
-    new() { Code = 9495, Battery = 0f, Flags = RfidTagFlags.Charge },
-    new() { Code = 10008, Battery = 3.6f, Flags = RfidTagFlags.Charge },
-    new() { Code = 10340, Battery = 4.2f, Flags = RfidTagFlags.None },
+    new() { Code = 9495, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.Charge },
+    new() { Code = 10008, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.Charge },
+    new() { Code = 10340, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None },
     new() { Code = 10366, Battery = -1f, Flags = RfidTagFlags.Charge },
-    new() { Code = 10389, Battery = 3.9f, Flags = RfidTagFlags.None },
+    new() { Code = 10389, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None }
     };
+    if (rand.Next() % 2 == 0) newtags.Add(new() { Code = 10400, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None });
+    if (rand.Next() % 3 == 0) newtags.Add(new() { Code = 10500, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None });
+    if (rand.Next() % 4 == 0) newtags.Add(new() { Code = 10600, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None });
 #else
-        _data = await _rtm.ReadTagsAsync();
+        var newtags = await _rtm.ReadTagsAsync();
 #endif
+        _data = newtags;
         _state = PageState.Success;
     }
 
