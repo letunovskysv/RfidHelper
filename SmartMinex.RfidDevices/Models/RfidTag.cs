@@ -24,7 +24,7 @@ namespace SmartMinex.Rfid
         /// <summary> Признак, что считыватель еще не получил информацию о напряжении.</summary>
         public readonly bool BatteryWait => Battery == 0f;
         /// <summary> Форматированный вывод показания батареи.</summary>
-        public string BatteryView => BatteryFault ? "Неисправна" : BatteryWait ? "???" : Battery + " В";
+        public string BatteryView => BatteryFault ? "Неисправна" : BatteryWait ? "???" : Battery.ToString("0.0") + " В";
 
         /// <summary> Признак, что считыватель еще не получил информацию о напряжении.</summary>
         public readonly string State => (Flags & RfidTagFlags.Charge) > 0 ? "Заряжается" : "Ожидание";
