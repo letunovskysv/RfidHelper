@@ -2,7 +2,7 @@
 @using SmartMinex.Runtime
 @inject TDispatcher _rtm
 
-<RadzenDataGrid Data="@_data" TItem="IDevice">
+<RadzenDataGrid Data="@_data" TItem="IDevice" @bind-Value=@_selected>
     <Columns>
         <RadzenDataGridColumn TItem="IDevice" Property="Address" Title="Адрес"/>
         <RadzenDataGridColumn TItem="IDevice" Property="Name" Title="Наименование" />
@@ -21,6 +21,7 @@
 
 @code {
     IEnumerable<IDevice>? _data;
+    IList<IDevice>? _selected;
 
     protected override void OnInitialized()
     {
