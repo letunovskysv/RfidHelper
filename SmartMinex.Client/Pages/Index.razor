@@ -12,11 +12,11 @@
     </RadzenStack>
     <RadzenStack Orientation="Orientation.Vertical" Gap="4px">
         Период опроса:
-        <RadzenDropDown Data=@_var_poll @bind-Value=@_poll ValueProperty="Key" TextProperty="Value" Style="width:250px;" />
+        <RadzenDropDown Data=@_var_poll @bind-Value=@_poll ValueProperty="Key" TextProperty="Value" Style="width:250px;" Change=@OnPollChanged />
     </RadzenStack>
     <RadzenStack Orientation="Orientation.Vertical" Gap="4px">
         Режим отображения:
-        <RadzenDropDown Data=@_var_mode @bind-Value=@_mode ValueProperty="Key" TextProperty="Value" Style="width:250px;" />
+        <RadzenDropDown Data=@_var_mode @bind-Value=@_mode ValueProperty="Key" TextProperty="Value" Style="width:250px;" Change=@OnModeChanged />
     </RadzenStack>
     <RadzenButton Style="height:36px;" Disabled=@(_state == PageState.None || _data == null) Click="@(e => ExportToPdf())">Экспорт в PDF</RadzenButton>
 </RadzenStack>
@@ -53,7 +53,8 @@
     float? _batteryfilter;
     int _poll;
     int _mode;
-    readonly Dictionary<int, string> _var_poll = new() { { 0, "Вручную" }, { 10, "10 сек" }, { 30, "30 сек" }, { 60, "1 мин" }, { 180, "3 мин" }, { 300, "5 мин" }, { 600, "10 мин" }, { 1800, "30 мин" } };
+    System.Timers.Timer? _timer;
+    readonly Dictionary<int, string> _var_poll = new() { { 0, "Вручную" }, { 5, "5 сек" }, { 10, "10 сек" }, { 30, "30 сек" }, { 60, "1 мин" }, { 180, "3 мин" }, { 300, "5 мин" }, { 600, "10 мин" }, { 1800, "30 мин" } };
     readonly Dictionary<int, string> _var_mode = new() { { 0, "Обновление" }, { 1, "Накопительный" } };
     readonly IEnumerable<string> _states = new[] { "Заряжается", "Ожидание", "Всё" };
     readonly Dictionary<float, string> _battery = new() { { -1f, "Неисправна" }, { 0f, "Ожидается" }, { 256, "Всё" } };
@@ -109,6 +110,27 @@
 
     string CountMessage(int count) =>
         " Найдено: " + count + (count.ToString()[^1].ToString() switch { "1" => " метка.", "2" => " метки.", "3" => " метки.", "4" => " метки.", _ => " меток." });
+
+    async Task OnPollChanged(object value)
+    {
+        _timer?.Stop();
+        _timer = null;
+        if (_poll > 0)
+        {
+            _timer = new System.Timers.Timer(_poll * 1000f);
+            _timer.Elapsed += async (s, e) =>
+            {
+                await OnPollClick();
+                await InvokeAsync(StateHasChanged);
+            };
+            _timer.Enabled = true;
+        }
+    }
+
+    void OnModeChanged(object value)
+    {
+
+    }
 
     async Task ExportToPdf()
     {
