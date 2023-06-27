@@ -58,6 +58,7 @@
         </Columns>
         </RadzenDataGrid>
 }
+<body onbeforeunload=""></body>
 @code {
     RadzenDataGrid<RfidTag>? _grid;
     PageState _state;
@@ -77,7 +78,7 @@
     {
         _poll = _rtm.Interval;
         _viewmode = _rtm.ViewMode;
-        var tagsdata = _accessor.HttpContext.Session.Get("tagsdata");
+        var tagsdata = _accessor.HttpContext.Session.GetString("tagsdata");
         if (tagsdata != null)
             try
             {
@@ -112,10 +113,9 @@
         var newtags = await _rtm.ReadTagsAsync();
 #endif
         _data = _viewmode == 0 ? newtags : DataMerge(_data, newtags);
-        if (_data != null)
-            _accessor.HttpContext.Session.Set("tagsdata", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(_data)));
-
         _state = PageState.Success;
+        //if (_data != null)
+        //    _accessor.HttpContext.Session.SetString("tagsdata", JsonSerializer.Serialize(_data));
     }
 
     void OnRowRender(DataGridCellRenderEventArgs<RfidTag> row)
