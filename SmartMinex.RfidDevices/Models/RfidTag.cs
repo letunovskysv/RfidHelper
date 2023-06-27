@@ -21,9 +21,10 @@ namespace SmartMinex.Rfid
 
         /// <summary> Признак неисправности аккумулятора (вздулась).</summary>
         public readonly bool BatteryFault => Battery == -1f;
-
         /// <summary> Признак, что считыватель еще не получил информацию о напряжении.</summary>
         public readonly bool BatteryWait => Battery == 0f;
+        /// <summary> Форматированный вывод показания батареи.</summary>
+        public string BatteryView => BatteryFault ? "Неисправна" : BatteryWait ? "???" : Battery + " В";
 
         /// <summary> Признак, что считыватель еще не получил информацию о напряжении.</summary>
         public readonly string State => (Flags & RfidTagFlags.Charge) > 0 ? "Заряжается" : "Ожидание";

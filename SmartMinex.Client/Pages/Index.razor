@@ -30,7 +30,7 @@
             <RadzenDataGridColumn TItem="RfidTag" Property="Code" Title="Номер" TextAlign="TextAlign.Right" />
             <RadzenDataGridColumn TItem="RfidTag" Property="Battery" Title="Зарядка" TextAlign="TextAlign.Right" FilterValue="@_batteryfilter">
                 <Template Context="r">
-                    <RadzenText>@(r.BatteryFault ? "Неисправна" : r.BatteryWait ? "???" : r.Battery + " В")</RadzenText>
+                    <RadzenText>@r.BatteryView</RadzenText>
                 </Template>
                 <FilterTemplate>
                     <RadzenDropDown Data="@_battery" @bind-Value=@_batteryfilter Style="width:100%" Change=@OnBatteryFilter ValueProperty="Key" TextProperty="Value" />
@@ -170,14 +170,14 @@
         if (_viewmode == 0)
             _data.ToList().ForEach(r => dt.Rows.Add(
                 r.Code,
-                r.BatteryFault ? "Неисправна" : r.BatteryWait ? "???" : r.Battery + " В",
+                r.BatteryView,
                 r.State,
                 r.Version)
             );
         else if (_viewmode == 1)
             _data.ToList().ForEach(r => dt.Rows.Add(
                 r.Code,
-                r.BatteryFault ? "Неисправна" : r.BatteryWait ? "???" : r.Battery + " В",
+                r.BatteryView,
                 r.State,
                 r.Version,
                 r.Modified,
