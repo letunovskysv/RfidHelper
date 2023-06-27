@@ -24,12 +24,12 @@ namespace SmartMinex.Web
 
         #endregion Declarations
 
-        public RfidClientService(IRuntime runtime, string schema, int? port) : base(runtime)
+        public RfidClientService(IRuntime runtime, string schema, int? port, int? interval, int? viewMode) : base(runtime)
         {
             Subscribe = new[] { MSG.ConsoleCommand, MSG.ReadTagsData };
             Port = port ?? 80; // default HTTP port
             Name = "Клиентская служба доступа к данным, http://[::]:" + Port;
-            _disp = new TDispatcher(Runtime);
+            _disp = new TDispatcher(Runtime, interval ?? 0, viewMode ?? 0);
         }
 
         protected override async Task ExecuteProcess()

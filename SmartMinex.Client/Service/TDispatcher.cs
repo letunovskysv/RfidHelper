@@ -17,9 +17,16 @@ namespace SmartMinex.Web
         readonly IRuntime _rtm;
         readonly ConcurrentDictionary<long, Envelope> _queue = new();
 
-        public TDispatcher(IRuntime runtime)
+        /// <summary> Период опроса меток.</summary>
+        public int Interval { get; set; }
+        /// <summary> Режим предстваления списка меток.</summary>
+        public int ViewMode { get; set; }
+
+        public TDispatcher(IRuntime runtime, int interval, int viewMode)
         {
             _rtm = runtime;
+            Interval = interval;
+            ViewMode = viewMode;
         }
 
         public async Task<RfidTag[]?> ReadTagsAsync()

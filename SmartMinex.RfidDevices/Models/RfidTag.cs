@@ -4,6 +4,8 @@
 namespace SmartMinex.Rfid
 {
     using System;
+    using System.ComponentModel;
+    using System.Text.Json.Serialization;
 
     public struct RfidTag
     {
@@ -26,11 +28,24 @@ namespace SmartMinex.Rfid
         /// <summary> Признак, что считыватель еще не получил информацию о напряжении.</summary>
         public readonly string State => (Flags & RfidTagFlags.Charge) > 0 ? "Заряжается" : "Ожидание";
 
+        /// <summary> [Статистика] Дата/Время последнего обновления сведений о метке.</summary>
+        [JsonIgnore]
+        public DateTime Modified { get; set; }
+        /// <summary> [Статистика] Статус.</summary>
+        [JsonIgnore]
+        public RfidStatus Status { get; set; }
+
         public RfidTag(int code, int flags, float power)
+            : this(code, flags, power, DateTime.Now, RfidStatus.Ready)
+        { }
+
+        public RfidTag(int code, int flags, float power, DateTime modified, RfidStatus status)
         {
             Code = code;
             Flags = (RfidTagFlags)flags;
             Battery = power;
+            Modified = modified;
+            Status = status;
         }
 
         public override string ToString() =>
@@ -44,5 +59,19 @@ namespace SmartMinex.Rfid
         None,
         /// <summary> Заряд(1) / Разряд(0) </summary>
         Charge = 0x80
+    }
+
+    /// <summary> Статусы метки.</summary>
+    [Flags]
+    public enum RfidStatus
+    {
+        [Description("Неопределённый")]
+        None,
+        [Description("Новая")]
+        New,
+        [Description("Видимая")]
+        Ready,
+        [Description("Потеряна")]
+        Fault
     }
 }

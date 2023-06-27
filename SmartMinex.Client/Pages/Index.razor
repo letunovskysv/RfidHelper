@@ -16,7 +16,7 @@
     </RadzenStack>
     <RadzenStack Orientation="Orientation.Vertical" Gap="4px">
         Режим отображения:
-        <RadzenDropDown Data=@_var_mode @bind-Value=@_mode ValueProperty="Key" TextProperty="Value" Style="width:250px;" Change=@OnModeChanged />
+        <RadzenDropDown Data=@_var_viewmode @bind-Value=@_viewmode ValueProperty="Key" TextProperty="Value" Style="width:250px;" />
     </RadzenStack>
     <RadzenButton Style="height:36px;" Disabled=@(_state == PageState.None || _data == null) Click="@(e => ExportToPdf())">Экспорт в PDF</RadzenButton>
 </RadzenStack>
@@ -42,6 +42,15 @@
                 </FilterTemplate>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn TItem="RfidTag" Property="Version" Title="Версия ПО" TextAlign="TextAlign.Right" />
+            @if (_viewmode == 1)
+            {
+                <RadzenDataGridColumn TItem="RfidTag" Property="Modified" Title="Изменена" TextAlign="TextAlign.Right" />
+                <RadzenDataGridColumn TItem="RfidTag" Property="Status" Title="Статус" TextAlign="TextAlign.Right">
+                    <Template Context="r">
+                        <RadzenText>@r.Status.ToDescription()</RadzenText>
+                    </Template>
+                </RadzenDataGridColumn>
+            }
         </Columns>
         </RadzenDataGrid>
 }
@@ -52,12 +61,18 @@
     string? _statefilter;
     float? _batteryfilter;
     int _poll;
-    int _mode;
+    int _viewmode;
     System.Timers.Timer? _timer;
     readonly Dictionary<int, string> _var_poll = new() { { 0, "Вручную" }, { 5, "5 сек" }, { 10, "10 сек" }, { 30, "30 сек" }, { 60, "1 мин" }, { 180, "3 мин" }, { 300, "5 мин" }, { 600, "10 мин" }, { 1800, "30 мин" } };
-    readonly Dictionary<int, string> _var_mode = new() { { 0, "Обновление" }, { 1, "Накопительный" } };
+    readonly Dictionary<int, string> _var_viewmode = new() { { 0, "Обновление" }, { 1, "Накопительный" } };
     readonly IEnumerable<string> _states = new[] { "Заряжается", "Ожидание", "Всё" };
     readonly Dictionary<float, string> _battery = new() { { -1f, "Неисправна" }, { 0f, "Ожидается" }, { 256, "Всё" } };
+
+    protected override void OnInitialized()
+    {
+        _poll = _rtm.Interval;
+        _viewmode = _rtm.ViewMode;
+    }
 
     async Task OnPollClick()
     {
@@ -67,23 +82,23 @@
     var rand = new Random();
     var newtags = new List<RfidTag>()
     {
-    new() { Code = 1295, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.Charge, Version = "2.32" },
-    new() { Code = 1417, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.Charge },
-    new() { Code = 1775, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None },
-    new() { Code = 8655, Battery = -1f, Flags = RfidTagFlags.None },
-    new() { Code = 9495, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.Charge },
-    new() { Code = 10008, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.Charge },
-    new() { Code = 10340, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None },
-    new() { Code = 10366, Battery = -1f, Flags = RfidTagFlags.Charge },
-    new() { Code = 10389, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None }
+    new() { Code = 1295, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.Charge, Version = "2.32", Modified= DateTime.Now, Status = RfidStatus.Ready },
+    new() { Code = 1417, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.Charge, Modified= DateTime.Now, Status = RfidStatus.Ready },
+    new() { Code = 1775, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None, Modified= DateTime.Now, Status = RfidStatus.Ready },
+    new() { Code = 8655, Battery = -1f, Flags = RfidTagFlags.None, Modified= DateTime.Now, Status = RfidStatus.Ready },
+    new() { Code = 9495, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.Charge, Modified= DateTime.Now, Status = RfidStatus.Ready },
+    new() { Code = 10008, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.Charge, Modified= DateTime.Now, Status = RfidStatus.Ready },
+    new() { Code = 10340, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None, Modified= DateTime.Now, Status = RfidStatus.Ready },
+    new() { Code = 10366, Battery = -1f, Flags = RfidTagFlags.Charge, Modified= DateTime.Now, Status = RfidStatus.Ready },
+    new() { Code = 10389, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None, Modified= DateTime.Now, Status = RfidStatus.Ready }
     };
-    if (rand.Next() % 2 == 0) newtags.Add(new() { Code = 10400, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None });
-    if (rand.Next() % 3 == 0) newtags.Add(new() { Code = 10500, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None });
-    if (rand.Next() % 4 == 0) newtags.Add(new() { Code = 10600, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None });
+    if (rand.Next() % 2 == 0) newtags.Add(new() { Code = 10400, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None, Modified= DateTime.Now, Status = RfidStatus.Ready });
+    if (rand.Next() % 3 == 0) newtags.Add(new() { Code = 10500, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None, Modified= DateTime.Now, Status = RfidStatus.Ready });
+    if (rand.Next() % 4 == 0) newtags.Add(new() { Code = 10600, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None, Modified= DateTime.Now, Status = RfidStatus.Ready });
 #else
         var newtags = await _rtm.ReadTagsAsync();
 #endif
-        _data = newtags;
+        _data = _viewmode == 0 ? newtags : DataMerge(_data, newtags);
         _state = PageState.Success;
     }
 
@@ -127,9 +142,18 @@
         }
     }
 
-    void OnModeChanged(object value)
+    IEnumerable<RfidTag> DataMerge(IEnumerable<RfidTag> data, IEnumerable<RfidTag> newdata)
     {
+        var res = new List<RfidTag>();
+        foreach (RfidTag tag in newdata)
+        {
+            var battery = tag.BatteryWait && data != null ? data.Any(t => t.Code == tag.Code) ? data.First(t => t.Code == tag.Code).Battery : tag.Battery : tag.Battery;
+            res.Add(new RfidTag(tag.Code, (int)tag.Flags, battery));
+        }
+        data?.Where(t => !newdata.Any(nt => nt.Code == t.Code)).ToList()
+            .ForEach(t => res.Add(new RfidTag(t.Code, (int)t.Flags, t.Battery, t.Modified, RfidStatus.Fault)));
 
+        return res.OrderBy(t => t.Code).ToArray();
     }
 
     async Task ExportToPdf()
