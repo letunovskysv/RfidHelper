@@ -48,8 +48,15 @@ namespace SmartMinex.Web
                     });
                     host.ConfigureServices((srv) =>
                     {
+                        srv.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
                         srv.AddSingleton(_disp);
                         srv.AddDistributedMemoryCache();
+                        srv.AddSession(opt =>
+                        {
+                            opt.Cookie.Name = ".lesev.session";
+                            opt.IdleTimeout = TimeSpan.FromMinutes(15);
+                            opt.Cookie.IsEssential = true;
+                        });
                     });
                     host.UseStartup<SmartWebServer>();
                 })

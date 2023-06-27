@@ -2,8 +2,12 @@
 @using System.Linq
 @using SmartMinex.Runtime
 @using System.Data;
+@using Microsoft.AspNetCore.Http
+@using System.Text;
+@using System.Text.Json;
 @inject TDispatcher _rtm
 @inject IJSRuntime _jsr
+@inject IHttpContextAccessor _accessor
 
 <RadzenStack Orientation="Orientation.Horizontal">
     <RadzenStack Orientation="Orientation.Vertical" Gap="4px">
@@ -73,6 +77,14 @@
     {
         _poll = _rtm.Interval;
         _viewmode = _rtm.ViewMode;
+        var tagsdata = _accessor.HttpContext.Session.Get("tagsdata");
+        if (tagsdata != null)
+            try
+            {
+                _data = JsonSerializer.Deserialize<IEnumerable<RfidTag>>(tagsdata);
+                _state = PageState.Success;
+            }
+            catch { }
     }
 
     async Task OnPollClick()
@@ -100,6 +112,9 @@
         var newtags = await _rtm.ReadTagsAsync();
 #endif
         _data = _viewmode == 0 ? newtags : DataMerge(_data, newtags);
+        if (_data != null)
+            _accessor.HttpContext.Session.Set("tagsdata", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(_data)));
+
         _state = PageState.Success;
     }
 
