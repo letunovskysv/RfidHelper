@@ -23,7 +23,7 @@
 
 @if (_state > PageState.None && _data != null)
 {
-    <RadzenDataGrid Data="@_data" TItem="RfidTag" AllowSorting="true" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" SelectionMode="DataGridSelectionMode.Single"
+    <RadzenDataGrid @ref="_grid" Data="@_data" TItem="RfidTag" AllowSorting="true" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" SelectionMode="DataGridSelectionMode.Single"
                     FilterMode="FilterMode.Simple" @bind-Value=@_selected CellRender=@OnRowRender
                     EmptyText="Нет доступных радиочастотных меток!">
         <Columns>
@@ -55,6 +55,7 @@
         </RadzenDataGrid>
 }
 @code {
+    RadzenDataGrid<RfidTag>? _grid;
     PageState _state;
     IEnumerable<RfidTag>? _data;
     IList<RfidTag>? _selected;
@@ -162,12 +163,10 @@
         doc.Open();
         doc.InsertText("Список радиочастотных меток [" + _data.Count() + "]:");
         var dt = new DataTable();
-        dt.Columns.AddRange(new[] {
-            new DataColumn("Номер", typeof(string)),
-            new DataColumn("Зарядка", typeof(string)),
-            new DataColumn("Состояние", typeof(string)),
-            new DataColumn("Версия ПО", typeof(string))
-        });
+
+        foreach (var col in _grid.ColumnsCollection)
+            dt.Columns.Add(col.Title, typeof(string));
+       
         _data.ToList().ForEach(r => dt.Rows.Add(
             r.Code,
             r.BatteryFault ? "Неисправна" : r.BatteryWait ? "???" : r.Battery + " В",
