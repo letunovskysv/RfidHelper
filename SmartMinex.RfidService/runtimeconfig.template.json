@@ -38,7 +38,8 @@
       "start": "auto",
       "port": 8000,
       "interval": 0,
-      "viewmode": 0
+      "viewmode": 0,
+      "tagidle": 3600
     }
   ]
 }

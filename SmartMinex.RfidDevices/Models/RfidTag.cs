@@ -73,6 +73,8 @@ namespace SmartMinex.Rfid
         [Description("Видимая")]
         Ready,
         [Description("Потеряна")]
-        Fault
+        Fault,
+        [Description("Недоступна")]
+        Unavailable
     }
 }

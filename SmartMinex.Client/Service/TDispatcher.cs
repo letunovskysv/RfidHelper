@@ -22,12 +22,15 @@ namespace SmartMinex.Web
         public int Interval { get; set; }
         /// <summary> Режим предстваления списка меток.</summary>
         public int ViewMode { get; set; }
+        /// <summary> Время, когда метка считается ушедшей.</summary>
+        public int TagIdle { get; set; }
 
-        public TDispatcher(IRuntime runtime, int interval, int viewMode)
+        public TDispatcher(IRuntime runtime, int interval, int viewMode, int tagIdle)
         {
             _rtm = runtime;
             Interval = interval;
             ViewMode = viewMode;
+            TagIdle = tagIdle;
         }
 
         public async Task<RfidTag[]?> ReadTagsAsync()

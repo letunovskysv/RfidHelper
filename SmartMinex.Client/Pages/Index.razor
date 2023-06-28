@@ -107,7 +107,7 @@
 #else
         var newtags = await _rtm.ReadTagsAsync();
 #endif
-        _session.TagsData = _data = _session.ViewMode == 0 ? newtags : DataMerge(_data, newtags);
+        _session.TagsData = _data = _session.ViewMode == 0 ? newtags : MergeData(_data, newtags);
         _state = PageState.Success;
     }
 
@@ -151,15 +151,16 @@
         }
     }
 
-    IEnumerable<RfidTag> DataMerge(IEnumerable<RfidTag> data, IEnumerable<RfidTag> newdata)
+    IEnumerable<RfidTag> MergeData(IEnumerable<RfidTag> data, IEnumerable<RfidTag> newdata)
     {
+        var ts = DateTime.Now;
         var res = new List<RfidTag>();
         foreach (RfidTag tag in newdata)
         {
             var battery = tag.BatteryWait && data != null ? data.Any(t => t.Code == tag.Code) ? data.First(t => t.Code == tag.Code).Battery : tag.Battery : tag.Battery;
             res.Add(new RfidTag(tag.Code, (int)tag.Flags, battery));
         }
-        data?.Where(t => !newdata.Any(nt => nt.Code == t.Code)).ToList()
+        data?.Where(t => (ts - t.Modified).TotalSeconds <= _rtm.TagIdle && !newdata.Any(nt => nt.Code == t.Code)).ToList()
             .ForEach(t => res.Add(new RfidTag(t.Code, (int)t.Flags, t.Battery, t.Modified, RfidStatus.Fault)));
 
         return res.OrderBy(t => t.Code).ToArray();
