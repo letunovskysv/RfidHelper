@@ -19,24 +19,30 @@ namespace SmartMinex.Web
         internal readonly TSessionStorage Sessions = new();
 
         /// <summary> Период опроса меток.</summary>
-        public int Interval { get; set; }
+        public int Interval
+        {
+            get => GetModuleProperty(MSG.GetPollInterval) is int n ? n : 0;
+            set => _rtm.Send(MSG.SetPollInterval, 0, 0, value);
+        }
         /// <summary> Режим предстваления списка меток.</summary>
         public int ViewMode { get; set; }
-        /// <summary> Время, когда метка считается ушедшей.</summary>
-        public int TagIdle { get; set; }
 
-        public TDispatcher(IRuntime runtime, int interval, int viewMode, int tagIdle)
+        public TDispatcher(IRuntime runtime, int viewMode)
         {
             _rtm = runtime;
-            Interval = interval;
+            Interval = 0;
             ViewMode = viewMode;
-            TagIdle = tagIdle;
         }
 
-        public async Task<RfidTag[]?> ReadTagsAsync()
+        public async Task<RfidTag[]?> ReadTagsAsync() =>
+            await ReadTags(MSG.ReadTagsRuntime, ++_count);
+
+        public async Task<RfidTag[]?> ReadTagsBufferedAsync() =>
+            await ReadTags(MSG.ReadTagsHistorian, ++_count);
+
+        async Task<RfidTag[]?> ReadTags(int msgid, int seqid)
         {
-            var seqid = _count++;
-            _rtm.Send(MSG.ReadTags, seqid);
+            _rtm.Send(msgid, seqid);
             var tkn = new TEnvelope(3000);
             _queue.TryAdd(seqid, tkn);
             while (tkn.Next) await Task.Delay(50);
@@ -56,6 +62,19 @@ namespace SmartMinex.Web
             if (m.Msg == MSG.ReadTagsData && _queue.TryRemove(m.LParam, out var tkn))
                 tkn.Receive(m.Data);
         });
+
+        public object? GetModuleProperty(int messageId)
+        {
+            var seqid = ++_count;
+            _rtm.Send(messageId, seqid);
+            var tkn = new TEnvelope(3000);
+            _queue.TryAdd(seqid, tkn);
+            while (tkn.Next) Task.Delay(10);
+            if (tkn.Data is int result)
+                return result;
+
+            return null;
+        }
     }
 
     class TEnvelope

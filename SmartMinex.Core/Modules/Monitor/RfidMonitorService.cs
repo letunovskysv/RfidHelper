@@ -10,6 +10,7 @@ namespace SmartMinex.Rfid
     using System.Reflection;
     using SmartMinex.Rfid.Modules;
     using SmartMinex.Runtime;
+    using static System.Runtime.InteropServices.JavaScript.JSType;
     #endregion Using
 
     internal class RfidMonitorService : TModule, IOServer
@@ -24,18 +25,32 @@ namespace SmartMinex.Rfid
         TDevice[] _init_devices;
 
         readonly IxLogger _logger;
+        readonly System.Timers.Timer? _timer;
 
         /// <summary> Список линий.</summary>
         readonly List<RfidAnchorReader> _readers = new();
-        public List<IDevice> Devices => _readers.SelectMany(r => r.Devices).ToList();
+        RfidTag[]? _tags_historian;
 
         #endregion Declarations
 
-        public RfidMonitorService(IRuntime runtime, SerialPortSetting serial, TDevice[]? devices) : base(runtime)
+        #region Properties
+
+        /// <summary> Период опроса меток. 0 - вручную.</summary>
+        public int Interval { get; set; }
+        /// <summary> Время, когда метка считается ушедшей.</summary>
+        public int TagIdle { get; set; }
+
+        public List<IDevice> Devices => _readers.SelectMany(r => r.Devices).ToList();
+
+        #endregion Properties
+
+        public RfidMonitorService(IRuntime runtime, SerialPortSetting serial, TDevice[]? devices, int? interval, int? tagIdle) : base(runtime)
         {
-            Subscribe = new[] { MSG.ConsoleCommand, MSG.ReadTags };
+            Subscribe = new[] { MSG.ConsoleCommand, MSG.ReadTagsRuntime, MSG.ReadTagsHistorian, MSG.GetPollInterval, MSG.SetPollInterval };
             _serial = serial;
             _init_devices = devices;
+            Interval = interval ?? 0;
+            TagIdle = tagIdle ?? 3600;
             _logger = new FileLogger(@"logs\rfiddevice.log");
             _logger.WriteLine("****************************************************************************************************");
         }
@@ -52,13 +67,25 @@ namespace SmartMinex.Rfid
                     {
                         switch (m.Msg)
                         {
-                            case MSG.ReadTags:
+                            case MSG.ReadTagsRuntime:
                                 OnPollTags(m.LParam);
+                                break;
+
+                            case MSG.ReadTagsHistorian:
+                                OnPollAndMergeTags(m.LParam);
                                 break;
 
                             case MSG.ConsoleCommand:
                                 if ((m.HParam == ProcessId || m.HParam == 0) && m.Data is string[] args && args.Length > 0)
                                     DoCommand(m.LParam, args);
+                                break;
+
+                            case MSG.GetPollInterval:
+                                Runtime.Send(MSG.ReadTagsData, m.LParam, 0, Interval);
+                                break;
+
+                            case MSG.SetPollInterval:
+                                Interval = m.Data is int interval ? interval : Interval;
                                 break;
                         }
                     }
@@ -233,6 +260,34 @@ namespace SmartMinex.Rfid
                 var tags = _readers.FirstOrDefault()?.ReadTagsFromBuffer();
                 if (tags != null)
                     Runtime.Send(MSG.ReadTagsData, idRequest, 0, tags);
+                else
+                    Runtime.Send(MSG.ReadTagsData, idRequest, -1, "Ошибка запроса меток.");
+            }
+            catch (Exception ex)
+            {
+                Runtime.Send(MSG.ReadTagsData, idRequest, -1, ex);
+            }
+        }
+
+        void OnPollAndMergeTags(long idRequest)
+        {
+            try
+            {
+                var tags = _readers.FirstOrDefault()?.ReadTagsFromBuffer();
+                if (tags != null)
+                {
+                    var ts = DateTime.Now;
+                    var res = new List<RfidTag>();
+                    foreach (var tag in tags)
+                    {
+                        var battery = tag.BatteryWait && _tags_historian != null ? _tags_historian.Any(t => t.Code == tag.Code) ? _tags_historian.First(t => t.Code == tag.Code).Battery : tag.Battery : tag.Battery;
+                        res.Add(new RfidTag(tag.Code, (int)tag.Flags, battery));
+                    }
+                    _tags_historian?.Where(t => (ts - t.Modified).TotalSeconds <= TagIdle && !tags.Any(nt => nt.Code == t.Code)).ToList()
+                        .ForEach(t => res.Add(new RfidTag(t.Code, (int)t.Flags, t.Battery, t.Modified, RfidStatus.Fault)));
+
+                    Runtime.Send(MSG.ReadTagsData, idRequest, 0, _tags_historian = res.OrderBy(t => t.Code).ToArray());
+                }
                 else
                     Runtime.Send(MSG.ReadTagsData, idRequest, -1, "Ошибка запроса меток.");
             }

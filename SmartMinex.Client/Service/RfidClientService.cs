@@ -21,21 +21,16 @@ namespace SmartMinex.Web
         readonly TDispatcher _disp;
 
         public int Port { get; set; }
-        public int Interval { get; }
         public int ViewMode { get; }
-        public int TagIdle { get; }
 
         #endregion Declarations
 
-        public RfidClientService(IRuntime runtime, string schema, int? port, int? interval, int? viewMode, int? tagIdle) : base(runtime)
+        public RfidClientService(IRuntime runtime, string schema, int? port, int? viewMode) : base(runtime)
         {
             Subscribe = new[] { MSG.ConsoleCommand, MSG.ReadTagsData };
             Port = port ?? 80; // default HTTP port
             Name = "Клиентская служба доступа к данным, http://[::]:" + Port;
-            _disp = new TDispatcher(Runtime,
-                Interval = interval ?? 0,
-                ViewMode = viewMode ?? 0,
-                TagIdle = tagIdle ?? 3600);
+            _disp = new TDispatcher(Runtime, ViewMode = viewMode ?? 0);
         }
 
         protected override async Task ExecuteProcess()

@@ -46,13 +46,23 @@ namespace SmartMinex.Runtime
         /// <remarks> LParam = ИД процесса (модуля); HParam = ИД терминальной сессии; Data = text/int - 0x484F4C44 HOLD, 0x46524545 FREE.</remarks>
         public const int TerminalLine = 0x0015;
 
-        /// <summary> [Команда] Чтение меток с устройства.</summary>
-        /// <remarks> LParam = ИД процесса (модуля); HParam = .</remarks>
-        public const int ReadTags = 0xa000;
+        /// <summary> [Команда] Чтение параметра Poll Interval.</summary>
+        /// <remarks> LParam = ИД процесса (модуля) отправителя; HParam = .</remarks>
+        public const int GetPollInterval = 0xa000;
+        /// <summary> [Команда] Запись параметра Poll Interval.</summary>
+        /// <remarks> LParam = ИД процесса (модуля) отправителя; HParam = ; Data = значение.</remarks>
+        public const int SetPollInterval = 0xa001;
+
+        /// <summary> [Команда] Чтение меток с устройства. Последний запрос.</summary>
+        /// <remarks> LParam = ИД процесса (модуля); HParam = Команда (запрос).</remarks>
+        public const int ReadTagsRuntime = 0xa002;
+        /// <summary> [Команда] Чтение меток с устройства. Накопительный запрос.</summary>
+        /// <remarks> LParam = ИД процесса (модуля); HParam = Команда (запрос).</remarks>
+        public const int ReadTagsHistorian = 0xa003;
 
         /// <summary> [Ответ] Возвращает данные чтения меток с устройства (команда ReadTags).</summary>
         /// <remarks> LParam = ИД процесса (модуля); HParam = -1 ошибка запроса.</remarks>
-        public const int ReadTagsData = 0xa001;
+        public const int ReadTagsData = 0xa004;
 
         /// <summary> Все сообщения.</summary>
         public const int All = 0x55555555;

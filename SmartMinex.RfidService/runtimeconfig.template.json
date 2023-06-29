@@ -18,6 +18,8 @@
       "name": "Служба опроса RFID-устройств",
       "type": "SmartMinex.Rfid.RfidMonitorService, SmartMinex.Core",
       "start": "auto",
+      "interval": 0,
+      "tagidle": 3600,
       "serial": {
         "name": "COM1",
         "baudrate": 38400,
@@ -37,9 +39,7 @@
       "type": "SmartMinex.Web.RfidClientService, SmartMinex.Web",
       "start": "auto",
       "port": 8000,
-      "interval": 0,
-      "viewmode": 0,
-      "tagidle": 3600
+      "viewmode": 0
     }
   ]
 }
