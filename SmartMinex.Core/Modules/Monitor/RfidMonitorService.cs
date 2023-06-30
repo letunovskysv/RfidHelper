@@ -25,7 +25,9 @@ namespace SmartMinex.Rfid
         TDevice[] _init_devices;
 
         readonly IxLogger _logger;
-        readonly System.Timers.Timer? _timer;
+        CancellationTokenSource _cts;
+        volatile bool _busy;
+        readonly object _syncRoot = new();
 
         /// <summary> Список линий.</summary>
         readonly List<RfidAnchorReader> _readers = new();
@@ -36,7 +38,7 @@ namespace SmartMinex.Rfid
         #region Properties
 
         /// <summary> Период опроса меток. 0 - вручную.</summary>
-        public int Interval { get; set; }
+        public int SamplingInterval { get; set; }
         /// <summary> Время, когда метка считается ушедшей.</summary>
         public int TagIdle { get; set; }
 
@@ -44,12 +46,12 @@ namespace SmartMinex.Rfid
 
         #endregion Properties
 
-        public RfidMonitorService(IRuntime runtime, SerialPortSetting serial, TDevice[]? devices, int? interval, int? tagIdle) : base(runtime)
+        public RfidMonitorService(IRuntime runtime, SerialPortSetting serial, TDevice[]? devices, int? samplingInterval, int? tagIdle) : base(runtime)
         {
             Subscribe = new[] { MSG.ConsoleCommand, MSG.ReadTagsRuntime, MSG.ReadTagsHistorian, MSG.GetPollInterval, MSG.SetPollInterval };
             _serial = serial;
             _init_devices = devices;
-            Interval = interval ?? 0;
+            SamplingInterval = samplingInterval ?? 0;
             TagIdle = tagIdle ?? 3600;
             _logger = new FileLogger(@"logs\rfiddevice.log");
             _logger.WriteLine("****************************************************************************************************");
@@ -60,6 +62,7 @@ namespace SmartMinex.Rfid
             Status = RuntimeStatus.Running;
             _readers.Add(new RfidAnchorReader(_serial, _logger, _init_devices));
             Open();
+            //PollTagsAsync();
             while (_sync.WaitOne() && (Status & RuntimeStatus.Loop) > 0)
                 try
                 {
@@ -81,11 +84,13 @@ namespace SmartMinex.Rfid
                                 break;
 
                             case MSG.GetPollInterval:
-                                Runtime.Send(MSG.ReadTagsData, m.LParam, 0, Interval);
+                                Runtime.Send(MSG.ReadTagsData, m.LParam, 0, SamplingInterval);
                                 break;
 
                             case MSG.SetPollInterval:
-                                Interval = m.Data is int interval ? interval : Interval;
+                                SamplingInterval = m.Data is int interval ? interval : SamplingInterval;
+                                StopPoll();
+                                //PollTagsAsync();
                                 break;
                         }
                     }
@@ -95,8 +100,90 @@ namespace SmartMinex.Rfid
                     Runtime.Send(MSG.ErrorMessage, ProcessId, 0, ex);
                 }
 
+            StopPoll();
             await base.ExecuteProcess();
         }
+
+        #region Acquisition
+
+        void PollTagsAsync()
+        {
+            if (SamplingInterval > 0)
+            {
+                while (_busy) Task.Delay(50);
+                _busy = true;
+                _cts = new CancellationTokenSource();
+                var tkn = _cts.Token;
+                Task.Factory.StartNew(() =>
+                {
+                    var timer = new TimerLaps(SamplingInterval * 1000, _cts.Token);
+                    while (!tkn.IsCancellationRequested)
+                    {
+                        try
+                        {
+                            var tags = ReadTagsFromBuffer();
+                            if (tags != null)
+                            {
+                                var hist = _tags_historian;
+                                var ts = DateTime.Now;
+                                var res = new List<RfidTag>();
+                                foreach (var tag in tags)
+                                {
+                                    var battery = tag.BatteryWait && hist != null
+                                        ? hist.Any(t => t.Code == tag.Code) ? hist.First(t => t.Code == tag.Code).Battery : tag.Battery : tag.Battery;
+
+                                    res.Add(new RfidTag(tag.Code, (int)tag.Flags, battery));
+                                }
+                                hist?.Where(t => (ts - t.Modified).TotalSeconds <= TagIdle && !tags.Any(nt => nt.Code == t.Code)).ToList()
+                                    .ForEach(t => res.Add(new RfidTag(t.Code, (int)t.Flags, t.Battery, t.Modified, RfidStatus.Fault)));
+
+                                _tags_historian = res.OrderBy(t => t.Code).ToArray();
+                            }
+                        }
+                        catch
+                        {
+                        }
+                        timer.DoEvents();
+                    }
+                });
+                _busy = false;
+            }
+        }
+
+        void StopPoll()
+        {
+            _cts?.Cancel();
+        }
+
+        RfidTag[]? ReadTagsFromBuffer()
+        {
+#if DEBUG
+            int n;
+            var rand = new Random();
+            var tags = new List<RfidTag>()
+            {
+                new() { Code = 1295, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.Charge, Version = "2.32", Modified= DateTime.Now, Status = RfidStatus.Ready },
+                new() { Code = 1417, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.Charge, Modified= DateTime.Now, Status = RfidStatus.Ready },
+                new() { Code = 1775, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None, Modified= DateTime.Now, Status = RfidStatus.Ready },
+                new() { Code = 8655, Battery = -1f, Flags = RfidTagFlags.None, Modified= DateTime.Now, Status = RfidStatus.Ready },
+                new() { Code = 9495, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.Charge, Modified= DateTime.Now, Status = RfidStatus.Ready },
+                new() { Code = 10008, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.Charge, Modified= DateTime.Now, Status = RfidStatus.Ready },
+                new() { Code = 10340, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None, Modified= DateTime.Now, Status = RfidStatus.Ready },
+                new() { Code = 10366, Battery = -1f, Flags = RfidTagFlags.Charge, Modified= DateTime.Now, Status = RfidStatus.Ready },
+                new() { Code = 10389, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None, Modified= DateTime.Now, Status = RfidStatus.Ready }
+            };
+            if (rand.Next() % 2 == 0) tags.Add(new() { Code = 10400, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None, Modified = DateTime.Now, Status = RfidStatus.Ready });
+            if (rand.Next() % 3 == 0) tags.Add(new() { Code = 10500, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None, Modified = DateTime.Now, Status = RfidStatus.Ready });
+            if (rand.Next() % 4 == 0) tags.Add(new() { Code = 10600, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None, Modified = DateTime.Now, Status = RfidStatus.Ready });
+
+            return tags.ToArray();
+#else
+            lock (_syncRoot)
+                return _readers.FirstOrDefault()?.ReadTagsFromBuffer();
+#endif
+        }
+
+#endregion Acquisition
 
         /// <summary> Выполнить консольную команду.</summary>
         void DoCommand(long idTerminal, string[] args)
@@ -238,17 +325,19 @@ namespace SmartMinex.Rfid
 
         void PollTags(long idTerminal, int address)
         {
-            var tags = _readers.FirstOrDefault()?.ReadTagsFromBuffer().Select(t => t.ToString());
+            var tags = ReadTagsFromBuffer()?.Select(t => t.ToString());
             if (tags != null)
+            {
                 Runtime.Send(MSG.TerminalLine, ProcessId, idTerminal,
                     "Найдено " + tags.Count() + " RFID-меток:\r\n  Номер Батарея   Флаги\r\n" +
                     string.Join("\r\n", tags) +
                     "\r\n, найдено " + tags.Count() + " RFID-меток.\r\n");
+            }
         }
 
         void ShowTags(long idTerminal)
         {
-            var tags = _readers.FirstOrDefault()?.Tags.Select(t => t.ToString());
+            var tags = ReadTagsFromBuffer()?.Select(t => t.ToString());
             if (tags != null)
                 Runtime.Send(MSG.TerminalLine, ProcessId, idTerminal, "Последние " + tags.Count() + " RFID-меток:\r\n  Номер Батарея   Флаги\r\n" + string.Join("\r\n", tags));
         }
@@ -257,7 +346,7 @@ namespace SmartMinex.Rfid
         {
             try
             {
-                var tags = _readers.FirstOrDefault()?.ReadTagsFromBuffer();
+                var tags = ReadTagsFromBuffer();
                 if (tags != null)
                     Runtime.Send(MSG.ReadTagsData, idRequest, 0, tags);
                 else
@@ -273,7 +362,7 @@ namespace SmartMinex.Rfid
         {
             try
             {
-                var tags = _readers.FirstOrDefault()?.ReadTagsFromBuffer();
+                var tags = ReadTagsFromBuffer();
                 if (tags != null)
                 {
                     var ts = DateTime.Now;

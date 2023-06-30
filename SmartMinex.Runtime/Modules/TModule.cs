@@ -79,6 +79,13 @@ namespace SmartMinex.Runtime
             await Task.Delay(0);
         }
 
+        /// <summary> Отправка сообщения непосредственно модулю напрямую, миную общую очередь.</summary>
+        protected void SendDirect(TMessage m)
+        {
+            _esb.Enqueue(m);
+            _sync?.Set();
+        }
+
         #region Database methods...
 
         /// <summary> Подключение и выполнение в среде БД.</summary>
