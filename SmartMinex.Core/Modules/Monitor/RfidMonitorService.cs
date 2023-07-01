@@ -138,6 +138,7 @@ namespace SmartMinex.Rfid
                                     .ForEach(t => res.Add(new RfidTag(t.Code, (int)t.Flags, t.Battery, t.Modified, RfidStatus.Fault)));
 
                                 _tags_historian = res.OrderBy(t => t.Code).ToArray();
+                                Runtime.Send(MSG.TagsUpdated, ProcessId);
                             }
                         }
                         catch
@@ -157,33 +158,11 @@ namespace SmartMinex.Rfid
 
         RfidTag[]? ReadTagsFromBuffer()
         {
-#if DEBUG
-            int n;
-            var rand = new Random();
-            var tags = new List<RfidTag>()
-            {
-                new() { Code = 1295, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.Charge, Version = "2.32", Modified= DateTime.Now, Status = RfidStatus.Ready },
-                new() { Code = 1417, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.Charge, Modified= DateTime.Now, Status = RfidStatus.Ready },
-                new() { Code = 1775, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None, Modified= DateTime.Now, Status = RfidStatus.Ready },
-                new() { Code = 8655, Battery = -1f, Flags = RfidTagFlags.None, Modified= DateTime.Now, Status = RfidStatus.Ready },
-                new() { Code = 9495, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.Charge, Modified= DateTime.Now, Status = RfidStatus.Ready },
-                new() { Code = 10008, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.Charge, Modified= DateTime.Now, Status = RfidStatus.Ready },
-                new() { Code = 10340, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None, Modified= DateTime.Now, Status = RfidStatus.Ready },
-                new() { Code = 10366, Battery = -1f, Flags = RfidTagFlags.Charge, Modified= DateTime.Now, Status = RfidStatus.Ready },
-                new() { Code = 10389, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None, Modified= DateTime.Now, Status = RfidStatus.Ready }
-            };
-            if (rand.Next() % 2 == 0) tags.Add(new() { Code = 10400, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None, Modified = DateTime.Now, Status = RfidStatus.Ready });
-            if (rand.Next() % 3 == 0) tags.Add(new() { Code = 10500, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None, Modified = DateTime.Now, Status = RfidStatus.Ready });
-            if (rand.Next() % 4 == 0) tags.Add(new() { Code = 10600, Battery = (n = rand.Next(27, 47)) <= 31 ? 0 : n / 10f, Flags = RfidTagFlags.None, Modified = DateTime.Now, Status = RfidStatus.Ready });
-
-            return tags.ToArray();
-#else
             lock (_syncRoot)
                 return _readers.FirstOrDefault()?.ReadTagsFromBuffer();
-#endif
         }
-
-#endregion Acquisition
+   
+        #endregion Acquisition
 
         /// <summary> Выполнить консольную команду.</summary>
         void DoCommand(long idTerminal, string[] args)

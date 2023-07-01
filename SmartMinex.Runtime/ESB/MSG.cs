@@ -53,16 +53,18 @@ namespace SmartMinex.Runtime
         /// <remarks> LParam = ИД процесса (модуля) отправителя; HParam = ; Data = значение.</remarks>
         public const int SetPollInterval = 0xa001;
 
+        /// <summary> Признак обновления данных тэгов.</summary>
+        public const int TagsUpdated = 0xa002;
         /// <summary> [Команда] Чтение меток с устройства. Последний запрос.</summary>
         /// <remarks> LParam = ИД процесса (модуля); HParam = Команда (запрос).</remarks>
-        public const int ReadTagsRuntime = 0xa002;
+        public const int ReadTagsRuntime = 0xa003;
         /// <summary> [Команда] Чтение меток с устройства. Накопительный запрос.</summary>
         /// <remarks> LParam = ИД процесса (модуля); HParam = Команда (запрос).</remarks>
-        public const int ReadTagsHistorian = 0xa003;
+        public const int ReadTagsHistorian = 0xa004;
 
         /// <summary> [Ответ] Возвращает данные чтения меток с устройства (команда ReadTags).</summary>
         /// <remarks> LParam = ИД процесса (модуля); HParam = -1 ошибка запроса.</remarks>
-        public const int ReadTagsData = 0xa004;
+        public const int ReadTagsData = 0xa005;
 
         /// <summary> Все сообщения.</summary>
         public const int All = 0x55555555;
