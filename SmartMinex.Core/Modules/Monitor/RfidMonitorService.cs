@@ -62,7 +62,7 @@ namespace SmartMinex.Rfid
             Status = RuntimeStatus.Running;
             _readers.Add(new RfidAnchorReader(_serial, _logger, _init_devices));
             Open();
-            //PollTagsAsync();
+            PollTagsAsync();
             while (_sync.WaitOne() && (Status & RuntimeStatus.Loop) > 0)
                 try
                 {
@@ -75,7 +75,7 @@ namespace SmartMinex.Rfid
                                 break;
 
                             case MSG.ReadTagsHistorian:
-                                OnPollAndMergeTags(m.LParam);
+                                Runtime.Send(MSG.ReadTagsData, m.LParam, 0, _tags_historian);
                                 break;
 
                             case MSG.ConsoleCommand:
@@ -90,7 +90,7 @@ namespace SmartMinex.Rfid
                             case MSG.SetPollInterval:
                                 SamplingInterval = m.Data is int interval ? interval : SamplingInterval;
                                 StopPoll();
-                                //PollTagsAsync();
+                                PollTagsAsync();
                                 break;
                         }
                     }
@@ -110,7 +110,7 @@ namespace SmartMinex.Rfid
         {
             if (SamplingInterval > 0)
             {
-                while (_busy) Task.Delay(50);
+                while (_busy) Task.Delay(50).Wait();
                 _busy = true;
                 _cts = new CancellationTokenSource();
                 var tkn = _cts.Token;
@@ -328,34 +328,6 @@ namespace SmartMinex.Rfid
                 var tags = ReadTagsFromBuffer();
                 if (tags != null)
                     Runtime.Send(MSG.ReadTagsData, idRequest, 0, tags);
-                else
-                    Runtime.Send(MSG.ReadTagsData, idRequest, -1, "Ошибка запроса меток.");
-            }
-            catch (Exception ex)
-            {
-                Runtime.Send(MSG.ReadTagsData, idRequest, -1, ex);
-            }
-        }
-
-        void OnPollAndMergeTags(long idRequest)
-        {
-            try
-            {
-                var tags = ReadTagsFromBuffer();
-                if (tags != null)
-                {
-                    var ts = DateTime.Now;
-                    var res = new List<RfidTag>();
-                    foreach (var tag in tags)
-                    {
-                        var battery = tag.BatteryWait && _tags_historian != null ? _tags_historian.Any(t => t.Code == tag.Code) ? _tags_historian.First(t => t.Code == tag.Code).Battery : tag.Battery : tag.Battery;
-                        res.Add(new RfidTag(tag.Code, (int)tag.Flags, battery));
-                    }
-                    _tags_historian?.Where(t => (ts - t.Modified).TotalSeconds <= TagIdle && !tags.Any(nt => nt.Code == t.Code)).ToList()
-                        .ForEach(t => res.Add(new RfidTag(t.Code, (int)t.Flags, t.Battery, t.Modified, RfidStatus.Fault)));
-
-                    Runtime.Send(MSG.ReadTagsData, idRequest, 0, _tags_historian = res.OrderBy(t => t.Code).ToArray());
-                }
                 else
                     Runtime.Send(MSG.ReadTagsData, idRequest, -1, "Ошибка запроса меток.");
             }

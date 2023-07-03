@@ -31,7 +31,12 @@ namespace SmartMinex.Runtime
         {
             var delay = Math.Max(10, _timeout - (int)(_timer.ElapsedMilliseconds - _cycle));
             _timer.Stop();
-            Task.Delay(delay, _cancellationToken).Wait();
+            var tsk = Task.Delay(delay);
+            try
+            {
+                tsk.Wait(_cancellationToken);
+            }
+            catch { }
             _cycle = _timer.ElapsedMilliseconds;
             _timer.Start();
         }

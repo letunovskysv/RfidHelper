@@ -27,7 +27,7 @@ namespace SmartMinex.Web
 
         public RfidClientService(IRuntime runtime, string schema, int? port, int? viewMode) : base(runtime)
         {
-            Subscribe = new[] { MSG.ConsoleCommand, MSG.ReadTagsData };
+            Subscribe = new[] { MSG.ConsoleCommand, MSG.ReadTagsData, MSG.TagsUpdated };
             Port = port ?? 80; // default HTTP port
             Name = "Клиентская служба доступа к данным, http://[::]:" + Port;
             _disp = new TDispatcher(Runtime, ViewMode = viewMode ?? 0);
@@ -73,6 +73,7 @@ namespace SmartMinex.Web
                     {
                         switch (m.Msg)
                         {
+                            case MSG.TagsUpdated:
                             case MSG.ReadTagsData:
                                 await _disp.OnMessageReceivedAsync(m);
                                 break;

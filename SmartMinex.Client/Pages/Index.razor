@@ -1,13 +1,14 @@
 ﻿@page "/"
 @using System.Linq
 @using SmartMinex.Runtime
-@using System.Data;
+@using System.Data
 @using Microsoft.AspNetCore.Http
-@using System.Text;
-@using System.Text.Json;
+@using System.Text
+@using System.Text.Json
 @inject TDispatcher _rtm
 @inject IJSRuntime _jsr
 @inject IHttpContextAccessor _accessor
+@implements IDisposable
 
 <RadzenStack Orientation="Orientation.Horizontal">
     <RadzenStack Orientation="Orientation.Vertical" Gap="4px">
@@ -67,7 +68,6 @@
     TSession _session;
     string? _statefilter;
     float? _batteryfilter;
-    System.Timers.Timer? _timer;
     readonly Dictionary<int, string> _varInterval = new() { { 0, "Вручную" }, { 5, "5 сек" }, { 10, "10 сек" }, { 30, "30 сек" }, { 60, "1 мин" }, { 180, "3 мин" }, { 300, "5 мин" }, { 600, "10 мин" }, { 1800, "30 мин" } };
     readonly Dictionary<int, string> _var_viewmode = new() { { 0, "Обновление" }, { 1, "Накопительный" } };
     readonly IEnumerable<string> _states = new[] { "Заряжается", "Ожидание", "Всё" };
@@ -87,6 +87,18 @@
         _session.ViewMode = _session.ViewMode ?? _rtm.ViewMode;
         _data = _session.TagsData;
         _state = _data == null ? PageState.None : PageState.Success;
+        _rtm.OnTagsUpdated += OnTagsUpdated;
+    }
+
+    public void Dispose()
+    {
+        _rtm.OnTagsUpdated -= OnTagsUpdated;
+    }
+
+    async void OnTagsUpdated()
+    {
+        await OnPollClick();
+        await InvokeAsync(StateHasChanged);
     }
 
     async Task OnPollClick()
@@ -123,18 +135,18 @@
 
     async Task OnPollChanged(object value)
     {
-        _timer?.Stop();
-        _timer = null;
-        if (Interval > 0)
-        {
-            _timer = new System.Timers.Timer(Interval * 1000f);
-            _timer.Elapsed += async (s, e) =>
-            {
-                await OnPollClick();
-                await InvokeAsync(StateHasChanged);
-            };
-            _timer.Enabled = true;
-        }
+        //_timer?.Stop();
+        //_timer = null;
+        //if (Interval > 0)
+        //{
+        //    _timer = new System.Timers.Timer(Interval * 1000f);
+        //    _timer.Elapsed += async (s, e) =>
+        //    {
+        //        await OnPollClick();
+        //        await InvokeAsync(StateHasChanged);
+        //    };
+        //    _timer.Enabled = true;
+        //}
     }
 
     async Task ExportToPdf()

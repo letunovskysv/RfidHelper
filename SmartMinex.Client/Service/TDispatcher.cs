@@ -17,6 +17,7 @@ namespace SmartMinex.Web
         readonly IRuntime _rtm;
         readonly ConcurrentDictionary<long, TEnvelope> _queue = new();
         internal readonly TSessionStorage Sessions = new();
+        public Action OnTagsUpdated;
 
         /// <summary> Период опроса меток.</summary>
         public int Interval
@@ -30,7 +31,6 @@ namespace SmartMinex.Web
         public TDispatcher(IRuntime runtime, int viewMode)
         {
             _rtm = runtime;
-            Interval = 0;
             ViewMode = viewMode;
         }
 
@@ -61,6 +61,9 @@ namespace SmartMinex.Web
         {
             if (m.Msg == MSG.ReadTagsData && _queue.TryRemove(m.LParam, out var tkn))
                 tkn.Receive(m.Data);
+
+            else if (m.Msg == MSG.TagsUpdated)
+                OnTagsUpdated?.Invoke();
         });
 
         public object? GetModuleProperty(int messageId)

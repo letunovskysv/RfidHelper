@@ -18,7 +18,7 @@
       "name": "Служба опроса RFID-устройств",
       "type": "SmartMinex.Rfid.RfidMonitorService, SmartMinex.Core",
       "start": "auto",
-      "samplingInterval": 0,
+      "samplingInterval": 5,
       "tagidle": 3600,
       "serial": {
         "name": "COM1",
