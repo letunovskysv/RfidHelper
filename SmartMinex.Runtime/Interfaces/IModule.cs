@@ -27,6 +27,8 @@ namespace SmartMinex.Runtime
         void Stop();
         void Kill();
 
+        /// <summary> Установка свойства модуля с сохранением в БД, если необходимо.</summary>
+        bool SetProperty(string propertyName, object value, out string message);
         /// <summary> Последняя ошибка.</summary>
         Exception LastError { get; set; }
     }

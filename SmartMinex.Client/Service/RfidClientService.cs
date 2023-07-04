@@ -29,7 +29,7 @@ namespace SmartMinex.Web
         {
             Subscribe = new[] { MSG.ConsoleCommand, MSG.ReadTagsData, MSG.TagsUpdated };
             Port = port ?? 80; // default HTTP port
-            Name = "Клиентская служба доступа к данным, http://[::]:" + Port;
+            Name = "Клиентская служба доступа к данным, порт " + Port;
             _disp = new TDispatcher(Runtime, ViewMode = viewMode ?? 0);
         }
 

@@ -41,6 +41,8 @@ namespace SmartMinex.Rfid
         public int SamplingInterval { get; set; }
         /// <summary> Время, когда метка считается ушедшей.</summary>
         public int TagIdle { get; set; }
+        /// <summary> Счётчик циклов опроса.</summary>
+        public int PollCount { get; set; }
 
         public List<IDevice> Devices => _readers.SelectMany(r => r.Devices).ToList();
 
@@ -139,6 +141,7 @@ namespace SmartMinex.Rfid
 
                                 _tags_historian = res.OrderBy(t => t.Code).ToArray();
                                 Runtime.Send(MSG.TagsUpdated, ProcessId);
+                                PollCount++;
                             }
                         }
                         catch

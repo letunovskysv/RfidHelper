@@ -92,7 +92,10 @@ namespace SmartMinex.Runtime
 
         void DoModuleCommand(StringBuilder output, string command, string[] args) => UseModule(command, mod =>
         {
-            Runtime.Send(MSG.ConsoleCommand, ProcessId, mod.ProcessId, args);
+            if (args.Length > 2 && args[1].Trim() == "=" && Regex.IsMatch(args[0], @"[_\w]+"))
+                SetModuleProperty(mod, args[0], string.Join(' ', args.Where((p, i) => i > 1).ToArray()));
+            else
+                Runtime.Send(MSG.ConsoleCommand, ProcessId, mod.ProcessId, args);
         });
 
         /// <summary> Получить конфигурацию модуля (процесса). Команда MOD CONFIG.</summary>
@@ -113,6 +116,25 @@ namespace SmartMinex.Runtime
                     output.Append(val?.ToString() ?? "NULL").Append(NEWLINE);
             }
         });
+
+        /// <summary> Установка свойств модуля.</summary>
+        bool SetModuleProperty(IModule mod, string name, string value)
+        {
+            try
+            {
+                if (mod.SetProperty(name, value, out string msg))
+                {
+                    Print(TColor.GOOD("OK"));
+                    return true;
+                }
+                Print(TColor.FAIL(msg));
+            }
+            catch (Exception ex)
+            {
+                Print(TColor.FAIL(ex.Message));
+            }
+            return false;
+        }
 
         void UseModule(string command, Action<IModule> handler)
         {

@@ -7,6 +7,8 @@ namespace SmartMinex.Runtime
     #region Using
     using System;
     using System.Collections.Concurrent;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Reflection;
     #endregion Using
 
     public delegate IDatabase DatabaseConnectionHandler();
@@ -84,6 +86,44 @@ namespace SmartMinex.Runtime
         {
             _esb.Enqueue(m);
             _sync?.Set();
+        }
+
+        public bool SetProperty(string propertyName, object value, out string? message)
+        {
+            message = null;
+            var prop = GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+            if (prop != null)
+            {
+                object val = null;
+                if (prop.PropertyType.IsEnum)
+                {
+                    if (Enum.TryParse(prop.PropertyType, value?.ToString(), true, out var eval))
+                        prop.SetValue(this, val = eval);
+                    else
+                    {
+                        message = "Не верное значение «" + value + "» параметра «" + propertyName + "»!";
+                        return false;
+                    }
+                }
+                else if (prop.PropertyType == typeof(int))
+                    prop.SetValue(this, val = val is int ? val : int.Parse(value.ToString()));
+                else if (prop.PropertyType == typeof(float))
+                    prop.SetValue(this, val = val is float ? val : float.Parse(value.ToString()));
+                else if (prop.PropertyType == typeof(double))
+                    prop.SetValue(this, val = val is double ? val : double.Parse(value.ToString()));
+                else if (prop.PropertyType == typeof(bool))
+                    prop.SetValue(this, val = val is bool ? val : bool.Parse(value.ToString().Replace("1", "True").Replace("0", "False")));
+                else if (prop.PropertyType == typeof(string))
+                    prop.SetValue(this, val = val is string ? val : value.ToString());
+                else
+                {
+                    message = "Не верное значение «" + value + "» параметра «" + propertyName + "»!";
+                    return false;
+                }
+                return true;
+            }
+            message = "Параметр «" + propertyName + "» не найден!";
+            return false;
         }
 
         #region Database methods...
