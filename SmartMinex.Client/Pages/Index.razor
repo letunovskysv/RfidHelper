@@ -41,15 +41,16 @@
                     <RadzenDropDown Data="@_battery" @bind-Value=@_batteryfilter Style="width:100%" Change=@OnBatteryFilter ValueProperty="Key" TextProperty="Value" />
                 </FilterTemplate>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="RfidTag" Property="State" Title="Состояние" TextAlign="TextAlign.Right" FilterValue="@_statefilter">
+            <RadzenDataGridColumn TItem="RfidTag" Property="State" Title="Состояние АКБ" TextAlign="TextAlign.Right" FilterValue="@_statefilter">
                 <FilterTemplate>
                     <RadzenDropDown Data="@_states" @bind-Value=@_statefilter Style="width:100%" Change=@OnStateFilter />
                 </FilterTemplate>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="RfidTag" Property="Version" Title="Версия ПО" TextAlign="TextAlign.Right" />
+            <!--<RadzenDataGridColumn TItem="RfidTag" Property="Version" Title="Версия ПО" TextAlign="TextAlign.Right" />-->
             @if (_session.ViewMode == 1)
             {
                 <RadzenDataGridColumn TItem="RfidTag" Property="Modified" Title="Изменена" TextAlign="TextAlign.Right" Filterable="false" />
+                <RadzenDataGridColumn TItem="RfidTag" Property="Waiting" Title="Ожидание" TextAlign="TextAlign.Right" Filterable="false" />
                 <RadzenDataGridColumn TItem="RfidTag" Property="Status" Title="Статус" TextAlign="TextAlign.Right" Filterable="false">
                     <Template Context="r">
                         <RadzenText>@r.Status.ToDescription()</RadzenText>
@@ -163,16 +164,16 @@
             _data.ToList().ForEach(r => dt.Rows.Add(
                 r.Code,
                 r.BatteryView,
-                r.State,
-                r.Version)
+                r.State)
             );
         else if (_session.ViewMode == 1)
             _data.ToList().ForEach(r => dt.Rows.Add(
                 r.Code,
                 r.BatteryView,
                 r.State,
-                r.Version,
+                //r.Version,
                 r.Modified,
+                r.Waiting,
                 r.Status.ToDescription())
             );
 

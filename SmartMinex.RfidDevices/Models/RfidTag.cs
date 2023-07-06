@@ -32,6 +32,9 @@ namespace SmartMinex.Rfid
         /// <summary> [Статистика] Дата/Время последнего обновления сведений о метке.</summary>
         [JsonIgnore]
         public DateTime Modified { get; set; }
+        /// <summary> Форматированный вывод показания батареи.</summary>
+        [JsonIgnore]
+        public string Waiting => string.Concat((DateTime.Now - Modified).Seconds, " сек");
         /// <summary> [Статистика] Статус.</summary>
         [JsonIgnore]
         public RfidStatus Status { get; set; }

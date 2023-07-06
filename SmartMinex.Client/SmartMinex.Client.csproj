@@ -18,14 +18,12 @@
   
   <ItemGroup>
     <Content Remove="wwwroot\_content\Radzen.Blazor\**\*" />
+    <Content Remove="wwwroot\SmartMinex.Web.styles.css" />
+    <Content Remove="wwwroot\Руководство пользователя БОМ.pdf" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="wwwroot\**\*" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Remove="wwwroot\SmartMinex.Web.styles.css" />
   </ItemGroup>
 
   <ItemGroup>
