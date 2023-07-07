@@ -77,7 +77,7 @@ namespace SmartMinex.Rfid
             try
             {
                 _connection.Open();
-                InitAsync().ConfigureAwait(false);
+                InitContent();
                 return true;
             }
             catch (Exception ex)
@@ -92,11 +92,11 @@ namespace SmartMinex.Rfid
             _connection.Close();
         }
 
-        async Task InitAsync() => await Task.Run(() =>
+        void InitContent()
         {
             lock (_syncRoot)
                 Devices.ForEach(d => ReadInfo(((RfidAnchor)d).Address));
-        });
+        }
 
         /// <summary> Возвращает наименование устройства. Проверка доступности устройства.</summary>
         public bool TryGetName(int address, out string? name)
