@@ -99,7 +99,11 @@
     async void OnTagsUpdated()
     {
         await OnPollClick();
-        await InvokeAsync(StateHasChanged);
+        try
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+        catch { }
     }
 
     async Task OnPollClick()
@@ -154,7 +158,7 @@
     {
         var doc = new DocumentPdf("Список RFID-меток.pdf");
         doc.Open();
-        doc.InsertText("Список радиочастотных меток [" + _data.Count() + "]:");
+        doc.InsertText("Список радиочастотных меток [" + _data.Count() + "]:                                                " + DateTime.Now.ToString());
         var dt = new DataTable();
 
         foreach (var col in _grid.ColumnsCollection)
