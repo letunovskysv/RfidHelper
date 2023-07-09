@@ -29,11 +29,11 @@
 @if (_state > PageState.None && _data != null)
 {
     <RadzenDataGrid @ref="_grid" Data="@_data" TItem="RfidTag" AllowSorting="true" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" SelectionMode="DataGridSelectionMode.Single"
-                    FilterMode="FilterMode.Simple" @bind-Value=@_selected CellRender=@OnRowRender
+                    FilterMode="FilterMode.Simple" @bind-Value=@_selected CellRender=@OnRowRender Sort=@OnSort
                     EmptyText="Нет доступных радиочастотных меток!">
         <Columns>
-            <RadzenDataGridColumn TItem="RfidTag" Property="Code" Title="Номер" TextAlign="TextAlign.Right" />
-            <RadzenDataGridColumn TItem="RfidTag" Property="Battery" Title="Зарядка" TextAlign="TextAlign.Right" FilterValue="@_batteryfilter">
+            <RadzenDataGridColumn TItem="RfidTag" Property="Code" Title="Номер" TextAlign="TextAlign.Right" SortOrder=@Sort("Code") />
+            <RadzenDataGridColumn TItem="RfidTag" Property="Battery" Title="Зарядка" TextAlign="TextAlign.Right" FilterValue="@_batteryfilter" SortOrder=@Sort("Battery")>
                 <Template Context="r">
                     <RadzenText>@r.BatteryView</RadzenText>
                 </Template>
@@ -41,7 +41,7 @@
                     <RadzenDropDown Data="@_battery" @bind-Value=@_batteryfilter Style="width:100%" Change=@OnBatteryFilter ValueProperty="Key" TextProperty="Value" />
                 </FilterTemplate>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="RfidTag" Property="State" Title="Состояние АКБ" TextAlign="TextAlign.Right" FilterValue="@_statefilter">
+            <RadzenDataGridColumn TItem="RfidTag" Property="State" Title="Состояние АКБ" TextAlign="TextAlign.Right" FilterValue="@_statefilter" SortOrder=@Sort("State")>
                 <FilterTemplate>
                     <RadzenDropDown Data="@_states" @bind-Value=@_statefilter Style="width:100%" Change=@OnStateFilter />
                 </FilterTemplate>
@@ -49,9 +49,9 @@
             <!--<RadzenDataGridColumn TItem="RfidTag" Property="Version" Title="Версия ПО" TextAlign="TextAlign.Right" />-->
             @if (_session.ViewMode == 1)
             {
-                <RadzenDataGridColumn TItem="RfidTag" Property="Modified" Title="Изменена" TextAlign="TextAlign.Right" Filterable="false" />
-                <RadzenDataGridColumn TItem="RfidTag" Property="Waiting" Title="Ожидание" TextAlign="TextAlign.Right" Filterable="false" />
-                <RadzenDataGridColumn TItem="RfidTag" Property="Status" Title="Статус" TextAlign="TextAlign.Right" Filterable="false">
+                <RadzenDataGridColumn TItem="RfidTag" Property="Modified" Title="Изменена" TextAlign="TextAlign.Right" Filterable="false" SortOrder=@Sort("Modified") />
+                <RadzenDataGridColumn TItem="RfidTag" Property="Waiting" Title="Ожидание" TextAlign="TextAlign.Right" Filterable="false" SortOrder=@Sort("Waiting") />
+                <RadzenDataGridColumn TItem="RfidTag" Property="Status" Title="Статус" TextAlign="TextAlign.Right" Filterable="false" SortOrder=@Sort("Status")>
                     <Template Context="r">
                         <RadzenText>@r.Status.ToDescription()</RadzenText>
                     </Template>
@@ -68,6 +68,7 @@
     IList<RfidTag>? _selected;
     TSession _session;
     string? _statefilter;
+    Tuple<string, SortOrder?>? _sortcol;
     float? _batteryfilter;
     readonly Dictionary<int, string> _varInterval = new() { { 0, "Вручную" }, { 5, "5 сек" }, { 10, "10 сек" }, { 30, "30 сек" }, { 60, "1 мин" }, { 180, "3 мин" }, { 300, "5 мин" }, { 600, "10 мин" }, { 1800, "30 мин" } };
     readonly Dictionary<int, string> _var_viewmode = new() { { 0, "Обновление" }, { 1, "Накопительный" } };
@@ -122,6 +123,12 @@
             else if (row.Data.BatteryWait)
                 row.Attributes.Add("style", "background-color:#f9f4ec");
     }
+
+    void OnSort(DataGridColumnSortEventArgs<RfidTag> column) =>
+        _sortcol = Tuple.Create(column.Column.Property, column.SortOrder);
+
+    SortOrder? Sort(string field) =>
+        _sortcol == null || !field.Equals(_sortcol.Item1) ? null : _sortcol.Item2;
 
     void OnBatteryFilter(object value)
     {
